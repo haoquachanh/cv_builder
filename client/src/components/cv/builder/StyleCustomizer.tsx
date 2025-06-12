@@ -5,7 +5,6 @@ import { Select } from "@/components/common/Select";
 import { useCV } from "@/context/CVContext";
 import {
   PRIMARY_COLORS,
-  FONT_FAMILIES,
   BACKGROUND_COLORS,
   BACKGROUND_PATTERNS,
 } from "@/lib/contants";
@@ -19,7 +18,6 @@ export const StyleCustomizer = () => {
     updateCV("style", {
       ...(cv?.style || {
         primaryColor: PRIMARY_COLORS[0].value,
-        fontFamily: FONT_FAMILIES[0].value,
         backgroundColor: BACKGROUND_COLORS[0].value,
         backgroundPattern: BACKGROUND_PATTERNS[0].value,
       }),
@@ -53,36 +51,28 @@ export const StyleCustomizer = () => {
 
       {isOpen && (
         <div className="mt-4 space-y-4">
+          {" "}
           <Select
             label="Primary Color"
             value={cv?.style?.primaryColor || PRIMARY_COLORS[0].value}
             onChange={(e) => handleStyleChange("primaryColor", e.target.value)}
-            options={PRIMARY_COLORS}
+            options={[...PRIMARY_COLORS]}
           />
-
-          <Select
-            label="Font Family"
-            value={cv?.style?.fontFamily || FONT_FAMILIES[0].value}
-            onChange={(e) => handleStyleChange("fontFamily", e.target.value)}
-            options={FONT_FAMILIES}
-          />
-
           <Select
             label="Background Color"
             value={cv?.style?.backgroundColor || BACKGROUND_COLORS[0].value}
             onChange={(e) =>
               handleStyleChange("backgroundColor", e.target.value)
             }
-            options={BACKGROUND_COLORS}
+            options={[...BACKGROUND_COLORS]}
           />
-
           <Select
             label="Background Pattern"
             value={cv?.style?.backgroundPattern || BACKGROUND_PATTERNS[0].value}
             onChange={(e) =>
               handleStyleChange("backgroundPattern", e.target.value)
             }
-            options={BACKGROUND_PATTERNS}
+            options={[...BACKGROUND_PATTERNS]}
           />
         </div>
       )}

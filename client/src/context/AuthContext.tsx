@@ -8,6 +8,8 @@ import {
   ReactNode,
 } from "react";
 import { User } from "@/types/user";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +22,7 @@ interface AuthContextType {
 }
 
 const LOCAL_STORAGE_KEY = "auth_data";
+const AUTH_COOKIE_NAME = "authToken";
 
 interface StoredAuthData {
   user: User | null;
@@ -44,60 +47,59 @@ const getInitialAuthData = (): StoredAuthData => {
   return { user: null, token: null };
 };
 
+// Helper function to save auth data
+const saveAuthData = (data: StoredAuthData) => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    if (data.token) {
+      Cookies.set(AUTH_COOKIE_NAME, data.token, {
+        expires: 7, // 7 days
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+    } else {
+      Cookies.remove(AUTH_COOKIE_NAME);
+    }
+  } catch (error) {
+    console.error("Error saving auth data:", error);
+  }
+};
+
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(getInitialAuthData().user);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication status when component mounts
-    const checkAuth = async () => {
-      if (typeof window === "undefined") return;
-
-      try {
-        const { token } = getInitialAuthData();
-        if (token) {
-          // TODO: Validate token with backend
-          // const validatedUser = await validateToken(token);
-          // setUser(validatedUser);
-        }
-      } catch (error) {
-        console.error("Error validating authentication:", error);
-        setUser(null);
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
+    // Check for existing auth data on mount
+    const { user, token } = getInitialAuthData();
+    if (user && token) {
+      setUser(user);
+    }
+    setIsLoading(false);
   }, []);
-
-  const saveAuthData = (data: StoredAuthData) => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-  };
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // TODO: Implement actual API call
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // TODO: Replace with actual API call
+      const mockUser: User = {
+        id: "1",
+        email,
+        fullName: "Test User",
+        role: "user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      const mockToken = "mock_token_" + Date.now();
 
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const { user, token } = await response.json();
-      setUser(user);
-      saveAuthData({ user, token });
+      setUser(mockUser);
+      saveAuthData({ user: mockUser, token: mockToken });
+      router.push("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -109,20 +111,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (email: string, password: string, name: string) => {
     try {
       setIsLoading(true);
-      // TODO: Implement actual API call
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
-      });
+      // TODO: Replace with actual API call
+      const mockUser: User = {
+        id: "1",
+        email,
+        fullName: name,
+        role: "user",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      const mockToken = "mock_token_" + Date.now();
 
-      if (!response.ok) {
-        throw new Error("Registration failed");
-      }
-
-      const { user, token } = await response.json();
-      setUser(user);
-      saveAuthData({ user, token });
+      setUser(mockUser);
+      saveAuthData({ user: mockUser, token: mockToken });
+      router.push("/dashboard");
     } catch (error) {
       console.error("Registration error:", error);
       throw error;
@@ -134,9 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       setIsLoading(true);
-      // TODO: Implement actual API call if needed
       setUser(null);
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      saveAuthData({ user: null, token: null });
+      router.push("/login");
     } catch (error) {
       console.error("Logout error:", error);
       throw error;
@@ -148,16 +150,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = async (email: string) => {
     try {
       setIsLoading(true);
-      // TODO: Implement actual API call
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Password reset request failed");
-      }
+      // TODO: Implement password reset logic
+      console.log("Password reset requested for:", email);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
       console.error("Password reset error:", error);
       throw error;

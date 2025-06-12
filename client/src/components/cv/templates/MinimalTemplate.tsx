@@ -1,9 +1,9 @@
-import { CV } from "@/types/cv";
+import { CV, type Skill as SkillType } from "@/types/cv";
+import { useMemo } from "react";
 
 export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
   const defaultStyle = {
     primaryColor: "#6B7280", // Default gray
-    fontFamily: "Inter, system-ui, sans-serif",
     backgroundColor: "#ffffff",
     backgroundPattern: "none",
   };
@@ -12,13 +12,30 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
     ...defaultStyle,
     ...data.style,
   };
+  const skillsByCategory = useMemo(() => {
+    if (!data.skills) return new Map<string, SkillType[]>();
+    const grouped = new Map<string, SkillType[]>();
+    data.skills.forEach((skill) => {
+      const category = skill.category?.trim();
+      // Skip skills without a category or with "Uncategorized"
+      if (!category || category.toLowerCase() === "uncategorized") return;
+      if (!grouped.has(category)) {
+        grouped.set(category, []);
+      }
+      const categorySkills = grouped.get(category);
+      if (categorySkills) {
+        categorySkills.push(skill);
+      }
+    });
+    return grouped;
+  }, [data.skills]);
 
   return (
     <div
-      className="cv-page p-8 shadow-lg w-[210mm] mx-auto print:mx-0 print:shadow-none"
+      className="cv-page p-8 shadow-lg w-[210mm] mx-auto print:mx-0 print:shadow-none font-sans"
       style={{
         minHeight: "297mm",
-        fontFamily: style.fontFamily,
+        color: "#374151", // Base text color
         backgroundColor: style.backgroundColor,
         backgroundImage:
           style.backgroundPattern !== "none" ? style.backgroundPattern : "none",
@@ -27,7 +44,10 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
       }}
     >
       {/* Header Section */}{" "}
-      <header className="pb-6 mb-6">
+      <header
+        className="pb-6 mb-6 border-b"
+        style={{ borderColor: `${style.primaryColor}20` }}
+      >
         <h1
           className="text-3xl font-light tracking-wide"
           style={{ color: style.primaryColor }}
@@ -35,11 +55,14 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
           {data.personalInfo?.fullName}
         </h1>
         {data.personalInfo?.title && (
-          <h2 className="text-xl mt-1 font-light text-gray-500">
+          <h2 className="text-xl mt-1 font-light" style={{ color: "#6B7280" }}>
             {data.personalInfo.title}
           </h2>
         )}
-        <div className="flex flex-wrap gap-6 mt-3 text-sm text-gray-500">
+        <div
+          className="flex flex-wrap gap-6 mt-3 text-sm"
+          style={{ color: "#6B7280" }}
+        >
           {data.personalInfo?.email && <span>{data.personalInfo.email}</span>}
           {data.personalInfo?.phone && <span>{data.personalInfo.phone}</span>}
           {data.personalInfo?.location && (
@@ -50,7 +73,7 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
               href={data.personalInfo.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:opacity-80"
+              className="hover:opacity-80 transition-opacity"
               style={{ color: style.primaryColor }}
             >
               LinkedIn
@@ -61,7 +84,7 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
               href={data.personalInfo.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:opacity-80"
+              className="hover:opacity-80 transition-opacity"
               style={{ color: style.primaryColor }}
             >
               GitHub
@@ -72,7 +95,7 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
               href={data.personalInfo.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:opacity-80"
+              className="hover:opacity-80 transition-opacity"
               style={{ color: style.primaryColor }}
             >
               Website
@@ -80,7 +103,10 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
           )}
         </div>
         {data.personalInfo?.summary && (
-          <p className="mt-6 leading-relaxed max-w-3xl text-gray-600">
+          <p
+            className="mt-6 leading-relaxed max-w-3xl"
+            style={{ color: "#4B5563" }}
+          >
             {data.personalInfo.summary}
           </p>
         )}
@@ -157,7 +183,10 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
         {/* Education Section */}
         {data.education && data.education.length > 0 && (
           <section>
-            <h2 className="text-base font-medium uppercase tracking-wider text-gray-500 mb-4">
+            <h2
+              className="text-base font-medium uppercase tracking-wider mb-4"
+              style={{ color: style.primaryColor }}
+            >
               Education
             </h2>
             <div className="space-y-6">
@@ -165,28 +194,81 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
                 <div key={edu.id} className="group">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">
+                      <h3
+                        className="text-lg font-medium"
+                        style={{ color: style.primaryColor }}
+                      >
                         {edu.school}
                       </h3>
-                      <h4 className="text-gray-600">
+                      <h4 style={{ color: "#4B5563" }}>
                         {edu.degree} in {edu.fieldOfStudy}
                       </h4>
                     </div>
-                    <div className="text-gray-500 text-sm">
+                    <div style={{ color: "#6B7280" }} className="text-sm">
                       {edu.startDate} - {edu.endDate || "Present"}
                     </div>
                   </div>
                   {edu.location && (
-                    <div className="text-gray-500 text-sm mt-1">
+                    <div style={{ color: "#6B7280" }} className="text-sm mt-1">
                       {edu.location}
                     </div>
                   )}
-                  {edu.gpa && (
-                    <div className="text-gray-600 mt-1">GPA: {edu.gpa}</div>
-                  )}
                   {edu.description && (
-                    <p className="mt-2 text-gray-600 whitespace-pre-line">
+                    <p
+                      className="mt-2 whitespace-pre-line"
+                      style={{ color: "#4B5563" }}
+                    >
                       {edu.description}
+                    </p>
+                  )}
+                  {edu.gpa && (
+                    <div className="mt-1 text-sm" style={{ color: "#6B7280" }}>
+                      GPA: {edu.gpa}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Projects Section */}
+        {data.projects && data.projects.length > 0 && (
+          <section>
+            <h2
+              className="text-base font-medium uppercase tracking-wider mb-4"
+              style={{ color: style.primaryColor }}
+            >
+              Projects
+            </h2>
+            <div className="space-y-6">
+              {data.projects.map((project) => (
+                <div key={project.id} className="group">
+                  <div className="flex justify-between items-start">
+                    <h3
+                      className="text-lg font-medium"
+                      style={{ color: style.primaryColor }}
+                    >
+                      {project.name}
+                    </h3>
+                    {project.link && (
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm hover:opacity-80 transition-opacity"
+                        style={{ color: style.primaryColor }}
+                      >
+                        View Project
+                      </a>
+                    )}
+                  </div>
+                  {project.description && (
+                    <p
+                      className="mt-2 whitespace-pre-line"
+                      style={{ color: "#4B5563" }}
+                    >
+                      {project.description}
                     </p>
                   )}
                 </div>
@@ -198,78 +280,41 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
         {/* Skills Section */}
         {data.skills && data.skills.length > 0 && (
           <section>
-            <h2 className="text-base font-medium uppercase tracking-wider text-gray-500 mb-4">
+            <h2
+              className="text-base font-medium uppercase tracking-wider mb-4"
+              style={{ color: style.primaryColor }}
+            >
               Skills
             </h2>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {data.skills.map((skill) => (
-                <div
-                  key={skill.id}
-                  style={{
-                    color: skill.color || "rgb(75, 85, 99)",
-                    fontStyle: skill.fontStyle || "normal",
-                    fontWeight: skill.fontWeight || "normal",
-                    textDecoration: skill.textDecoration || "none",
-                  }}
-                >
-                  <span>{skill.name}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Projects Section */}
-        {data.projects && data.projects.length > 0 && (
-          <section>
-            <h2 className="text-base font-medium uppercase tracking-wider text-gray-500 mb-4">
-              Projects
-            </h2>
-            <div className="space-y-6">
-              {data.projects.map((project) => (
-                <div key={project.id} className="group">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      {project.link ? (
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:text-gray-600"
-                        >
-                          {project.name}
-                        </a>
-                      ) : (
-                        project.name
-                      )}
+            <div className="space-y-4">
+              {Array.from(skillsByCategory.entries()).map(
+                ([category, skills]) => (
+                  <div key={category}>
+                    <h3
+                      className="text-base font-medium mb-2"
+                      style={{ color: style.primaryColor }}
+                    >
+                      {category}
                     </h3>
-                    {(project.startDate || project.endDate) && (
-                      <div className="text-gray-500 text-sm">
-                        {project.startDate && project.startDate}
-                        {project.endDate && ` - ${project.endDate}`}
-                      </div>
-                    )}
-                  </div>
-                  {project.description && (
-                    <p className="mt-2 text-gray-600 whitespace-pre-line">
-                      {project.description}
-                    </p>
-                  )}
-                  {project.technologies && project.technologies.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {project.technologies.map((tech, index) => (
-                        <span key={index} className="text-sm text-gray-500">
-                          {tech}
-                          {project.technologies &&
-                          index < project.technologies.length - 1
-                            ? " •"
-                            : ""}
+                    <div className="flex flex-wrap gap-x-6 gap-y-1">
+                      {skills.map((skill) => (
+                        <span
+                          key={skill.id}
+                          className="text-sm"
+                          style={{
+                            color: "#4B5563",
+                            fontStyle: skill.fontStyle,
+                            fontWeight: skill.fontWeight,
+                            textDecoration: skill.textDecoration,
+                          }}
+                        >
+                          {skill.name}
                         </span>
                       ))}
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                )
+              )}
             </div>
           </section>
         )}

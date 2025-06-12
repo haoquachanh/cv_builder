@@ -12,14 +12,33 @@ import {
   TEXT_DECORATIONS,
 } from "@/lib/contants";
 import { Skill as SkillType } from "@/types/cv";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import { generateId } from "@/lib/utils/id";
 
 export const Skills = () => {
   const { cv, updateCV } = useCV();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
 
-  const handleAddSkill = () => {
+  // Group skills by category and filter out empty categories
+  const skillsByCategory = useMemo(() => {
+    if (!cv?.skills) return new Map<string, SkillType[]>();
+
+    const grouped = new Map<string, SkillType[]>();
+    cv.skills.forEach((skill) => {
+      const category = skill.category?.trim();
+      if (!category) return;
+      if (!grouped.has(category)) {
+        grouped.set(category, []);
+      }
+      grouped.get(category)?.push(skill);
+    });
+    return grouped;
+  }, [cv?.skills]);
+
+  const handleAddCategory = () => {
+    if (!newCategory.trim()) return;
     const newSkill: SkillType = {
       id: generateId("skill"),
       name: "",
@@ -27,37 +46,73 @@ export const Skills = () => {
       fontStyle: "normal",
       fontWeight: "normal",
       textDecoration: "none",
+      category: newCategory.trim(),
     };
     updateCV("skills", [...(cv?.skills || []), newSkill]);
-    setIsCollapsed(false); // Expand section when adding new skill
+    setNewCategory(""); // Reset input
+    setIsCollapsed(false);
   };
 
-  const handleDeleteSkill = (index: number) => {
-    const updatedSkills = cv?.skills?.filter((_, idx) => idx !== index);
+  const handleAddSkill = (category: string) => {
+    const newSkill: SkillType = {
+      id: generateId("skill"),
+      name: "",
+      color: "inherit",
+      fontStyle: "normal",
+      fontWeight: "normal",
+      textDecoration: "none",
+      category,
+    };
+    updateCV("skills", [...(cv?.skills || []), newSkill]);
+  };
+
+  const handleDeleteSkill = (skillId: string) => {
+    const updatedSkills = cv?.skills?.filter((s) => s.id !== skillId);
     updateCV("skills", updatedSkills || []);
   };
 
   const handleUpdateSkill = (
-    index: number,
+    skillId: string,
     field: keyof SkillType,
     value: string
   ) => {
     if (!cv?.skills) return;
+    const skillIndex = cv.skills.findIndex((s) => s.id === skillId);
+    if (skillIndex === -1) return;
+
     const updatedSkills = [...cv.skills];
-    updatedSkills[index] = {
-      ...updatedSkills[index],
+    updatedSkills[skillIndex] = {
+      ...updatedSkills[skillIndex],
       [field]: value,
     };
     updateCV("skills", updatedSkills);
   };
 
-  const addButton = (
-    <button
-      onClick={handleAddSkill}
-      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-    >
-      <FaPlus /> Add new
-    </button>
+  // Add new category section
+  const addCategorySection = (
+    <div className="flex gap-4 items-end mb-6">
+      <div className="flex-1">
+        <Input
+          name="new-category"
+          label="Add New Category"
+          placeholder="e.g. Programming Languages"
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleAddCategory();
+            }
+          }}
+        />
+      </div>
+      <button
+        onClick={handleAddCategory}
+        disabled={!newCategory.trim()}
+        className="px-4 py-2 h-10 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <FaPlus size={12} /> Add Category
+      </button>
+    </div>
   );
 
   return (
@@ -66,104 +121,164 @@ export const Skills = () => {
         title="Skills"
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
-        actionButton={addButton}
       />
 
       <div
-        className={`space-y-4 transition-all duration-300 ease-in-out ${
+        className={`space-y-6 transition-all duration-300 ease-in-out ${
           isCollapsed ? "hidden" : ""
         }`}
       >
-        {cv?.skills?.map((skill, idx) => (
-          <div
-            key={skill.id}
-            className="p-4 bg-white border border-gray-200 rounded-lg"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
-              <div className="lg:col-span-2">
-                <Input
-                  label="Skill Name"
-                  placeholder="e.g. React.js"
-                  value={skill.name}
-                  onChange={(e) =>
-                    handleUpdateSkill(idx, "name", e.target.value)
-                  }
-                />
-              </div>
-              <div>
-                <Select
-                  label="Màu chữ"
-                  options={SKILL_COLORS}
-                  value={skill.color || "inherit"}
-                  onChange={(e) =>
-                    handleUpdateSkill(idx, "color", e.target.value)
-                  }
-                />
-              </div>
-              <div>
-                <Select
-                  label="Kiểu chữ"
-                  options={FONT_STYLES}
-                  value={skill.fontStyle || "normal"}
-                  onChange={(e) =>
-                    handleUpdateSkill(idx, "fontStyle", e.target.value)
-                  }
-                />
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <Select
-                    label="Độ đậm"
-                    options={FONT_WEIGHTS}
-                    value={skill.fontWeight || "normal"}
-                    onChange={(e) =>
-                      handleUpdateSkill(idx, "fontWeight", e.target.value)
-                    }
-                  />
-                </div>
-                <div className="flex-1">
-                  <Select
-                    label="Gạch chân"
-                    options={TEXT_DECORATIONS}
-                    value={skill.textDecoration || "none"}
-                    onChange={(e) =>
-                      handleUpdateSkill(idx, "textDecoration", e.target.value)
-                    }
-                  />
-                </div>
+        {/* Add new category section */}
+        {addCategorySection}
+
+        {/* Categories and their skills */}
+        <div className="space-y-8">
+          {Array.from(skillsByCategory.entries()).map(([category, skills]) => (
+            <div key={category} className="space-y-4">
+              {/* Category header */}
+              <div className="flex justify-between items-center border-b pb-2">
+                <h3 className="text-lg font-semibold text-gray-700">
+                  {category}
+                </h3>
                 <button
-                  onClick={() => handleDeleteSkill(idx)}
-                  className="self-end text-red-500 hover:text-red-700 transition-colors p-2 mt-6"
+                  onClick={() => handleAddSkill(category)}
+                  className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
                 >
-                  <FaTrash />
+                  <FaPlus size={12} /> Add Skill
                 </button>
               </div>
-            </div>
-            {/* Preview */}
-            <div className="mt-4 p-2 border-t border-gray-100">
-              <span className="text-sm text-gray-500">Preview: </span>
-              <span
-                style={{
-                  color: skill.color || "inherit",
-                  fontStyle: skill.fontStyle || "normal",
-                  fontWeight: skill.fontWeight || "normal",
-                  textDecoration: skill.textDecoration || "none",
-                }}
-              >
-                {skill.name || "Skill name"}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {(!cv?.skills || cv.skills.length === 0) && (
-        <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-gray-500">
-            No skills yet. Click &quot;Add new skill&quot; to get started.
-          </p>
+              {/* Skills in this category */}
+              <div className="pl-4 space-y-4 border-l-2 border-gray-100">
+                {skills.map((skill) => (
+                  <div
+                    key={skill.id}
+                    className="p-4 bg-white border border-gray-200 rounded-lg"
+                  >
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                      {/* Left column - Content */}
+                      <div className="lg:col-span-3">
+                        <Input
+                          name={`skill-name-${skill.id}`}
+                          label="Skill Content"
+                          placeholder="e.g. JavaScript, TypeScript"
+                          value={skill.name}
+                          onChange={(e) =>
+                            handleUpdateSkill(skill.id, "name", e.target.value)
+                          }
+                        />
+                      </div>
+
+                      {/* Middle column - Style Options */}
+                      <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                          <Select
+                            label="Color"
+                            options={[...SKILL_COLORS]}
+                            value={skill.color || "inherit"}
+                            onChange={(e) =>
+                              handleUpdateSkill(
+                                skill.id,
+                                "color",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Select
+                            label="Font Style"
+                            options={[...FONT_STYLES]}
+                            value={skill.fontStyle || "normal"}
+                            onChange={(e) =>
+                              handleUpdateSkill(
+                                skill.id,
+                                "fontStyle",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Select
+                            label="Font Weight"
+                            options={[...FONT_WEIGHTS]}
+                            value={skill.fontWeight || "normal"}
+                            onChange={(e) =>
+                              handleUpdateSkill(
+                                skill.id,
+                                "fontWeight",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Select
+                            label="Decoration"
+                            options={[...TEXT_DECORATIONS]}
+                            value={skill.textDecoration || "none"}
+                            onChange={(e) =>
+                              handleUpdateSkill(
+                                skill.id,
+                                "textDecoration",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      {/* Right column - Delete button */}
+                      <div className="lg:col-span-1 flex lg:justify-end">
+                        <button
+                          onClick={() => handleDeleteSkill(skill.id)}
+                          className="inline-flex items-center justify-center text-red-500 hover:text-red-700 transition-colors p-2 rounded-full hover:bg-red-50"
+                          title="Delete skill"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Preview section */}
+                    <div className="mt-4 p-3 border border-gray-100 rounded-lg bg-gray-50">
+                      <span className="text-sm text-gray-500 mr-2">
+                        Preview:
+                      </span>
+                      <span className="font-medium mr-1">{category}:</span>
+                      <span
+                        style={{
+                          color: skill.color || "inherit",
+                          fontStyle: skill.fontStyle || "normal",
+                          fontWeight: skill.fontWeight || "normal",
+                          textDecoration: skill.textDecoration || "none",
+                        }}
+                      >
+                        {skill.name || "Skill content"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+
+        {(!cv?.skills || cv.skills.length === 0) && (
+          <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <p className="text-gray-500">
+              No skills yet. Add a category to get started.
+            </p>
+            <p className="text-gray-400 mt-2">
+              Tip: Start with categories like &quot;Programming Languages&quot;,
+              &quot;Framework / Lib&quot;, etc.
+            </p>
+          </div>
+        )}
+      </div>
     </section>
   );
 };
+
+export default Skills;

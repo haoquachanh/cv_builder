@@ -4,222 +4,299 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
 import { Input } from "../common/Input";
 import { Button } from "../common/Button";
-import { useAuth } from "@/context/AuthContext";
 import { LoadingSpinner } from "../common/LoadingSpinner";
-import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+  FaGoogle,
+  FaGithub,
+  FaArrowRight,
+  FaArrowLeft,
+} from "react-icons/fa";
 
-export const RegisterForm = () => {
+interface RegisterFormValues {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreeToTerms: boolean;
+}
+
+const validationSchema = [
+  // Step 1 validation
+  Yup.object({
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+  }),
+  // Step 2 validation
+  Yup.object({
+    name: Yup.string()
+      .min(2, "Name must be at least 2 characters")
+      .required("Name is required"),
+    password: Yup.string()
+      .min(8, "Password must be at least 8 characters")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[0-9]/, "Password must contain at least one number")
+      .required("Password is required"),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref("password")], "Passwords must match")
+      .required("Please confirm your password"),
+    agreeToTerms: Yup.boolean().oneOf(
+      [true],
+      "You must accept the terms and conditions"
+    ),
+  }),
+];
+
+export function RegisterForm() {
   const router = useRouter();
   const { register } = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savedValues, setSavedValues] = useState<Partial<RegisterFormValues>>(
+    {}
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const initialValues: RegisterFormValues = {
+    name: "",
+    email: savedValues.email || "",
+    password: "",
+    confirmPassword: "",
+    agreeToTerms: false,
+  };
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+  const handleSubmit = async (values: RegisterFormValues) => {
+    if (currentStep === 0) {
+      setSavedValues({ ...savedValues, email: values.email });
+      setCurrentStep(1);
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      await register(email, password, name);
-      router.push("/dashboard"); // Redirect to dashboard after successful registration
+      setError("");
+      const email = savedValues.email || values.email;
+      await register(email, values.password, values.name);
+      router.push("/dashboard");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "An error occurred during registration"
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again."
       );
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Join thousands of professionals building their CVs
-        </p>
-      </div>
+  const getPasswordStrength = (
+    password: string
+  ): { strength: number; text: string } => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                {error}
-              </div>
+    const strengthText =
+      ["Very Weak", "Weak", "Fair", "Good", "Strong"][strength - 1] || "";
+
+    return { strength, text: strengthText };
+  };
+
+  return (
+    <section className="max-w-md w-full mx-auto mt-8 p-8 bg-white rounded-xl shadow-lg">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
+        {currentStep === 0 ? "Create Account" : "Complete Your Profile"}
+      </h1>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema[currentStep]}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ values, isSubmitting }) => (
+          <Form className="space-y-6">
+            {currentStep === 0 ? (
+              <>
+                <div className="relative">
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="Email address"
+                    icon={<FaEnvelope className="text-gray-400" />}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <>
+                      Continue
+                      <FaArrowRight />
+                    </>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="relative">
+                  <Input
+                    name="name"
+                    type="text"
+                    placeholder="Full name"
+                    icon={<FaUser className="text-gray-400" />}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="relative">
+                    <Input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create password"
+                      icon={<FaLock className="text-gray-400" />}
+                      rightIcon={
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      }
+                    />
+                  </div>
+                  {values.password && (
+                    <div className="mt-2">
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((level) => (
+                          <div
+                            key={level}
+                            className={`h-1 flex-1 rounded-full ${
+                              getPasswordStrength(values.password).strength >=
+                              level
+                                ? "bg-blue-500"
+                                : "bg-gray-200"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        Password strength:{" "}
+                        {getPasswordStrength(values.password).text}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <Input
+                    name="confirmPassword"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Confirm password"
+                    icon={<FaLock className="text-gray-400" />}
+                  />
+                </div>
+
+                <label className="flex items-center text-gray-700 text-sm gap-2">
+                  <input
+                    type="checkbox"
+                    name="agreeToTerms"
+                    className="rounded text-blue-600 focus:ring-blue-500"
+                  />
+                  I agree to the{" "}
+                  <Link
+                    href="/terms"
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    terms and conditions
+                  </Link>
+                </label>
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => setCurrentStep(0)}
+                    className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <FaArrowLeft />
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <LoadingSpinner size="sm" />
+                    ) : (
+                      "Create Account"
+                    )}
+                  </Button>
+                </div>
+              </>
             )}
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                  className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm 
-                           placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500
-                           disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="Enter your full name"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                  className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm 
-                           placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500
-                           disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="Enter your email"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                  className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm 
-                           placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500
-                           disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="Create a password"
-                  minLength={8}
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Password must be at least 8 characters long
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                  className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg shadow-sm 
-                           placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500
-                           disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="Confirm your password"
-                  minLength={8}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Button
-                type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <LoadingSpinner size="sm" />
-                    Creating account...
-                  </span>
-                ) : (
-                  "Create Account"
-                )}
-              </Button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <div className="relative">
+            <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                onClick={() => {/* TODO: Implement Google signup */}}
+                className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <FaGoogle className="h-5 w-5 text-red-500" />
-                <span className="ml-2">Google</span>
+                <FaGoogle className="text-red-500" />
+                <span>Google</span>
               </button>
               <button
                 type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                onClick={() => {/* TODO: Implement GitHub signup */}}
+                className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                <FaGithub className="h-5 w-5 text-gray-900" />
-                <span className="ml-2">GitHub</span>
+                <FaGithub className="text-gray-900" />
+                <span>GitHub</span>
               </button>
             </div>
-          </div>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-center text-gray-600 text-sm mt-8">
               Already have an account?{" "}
-              <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
-                Sign in here
+              <Link
+                href="/login"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Sign in
               </Link>
             </p>
-          </div>
-        </div>
-      </div>
-    </div>
+          </Form>
+        )}
+      </Formik>
+    </section>
   );
+}

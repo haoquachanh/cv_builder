@@ -1,9 +1,9 @@
-import { type CV, type Skill as SkillType } from "@/types/cv";
+import { CV, type Skill as SkillType } from "@/types/cv";
 import { useMemo } from "react";
 
-export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
+export const CreativeTemplate: React.FC<{ data: CV }> = ({ data }) => {
   const defaultStyle = {
-    primaryColor: "#2563eb", // Default blue
+    primaryColor: "#8B5CF6", // Default purple
     backgroundColor: "#ffffff",
     backgroundPattern: "none",
   };
@@ -12,12 +12,12 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
     ...defaultStyle,
     ...data.style,
   };
+
   const skillsByCategory = useMemo(() => {
     if (!data.skills) return new Map<string, SkillType[]>();
     const grouped = new Map<string, SkillType[]>();
     data.skills.forEach((skill) => {
       const category = skill.category?.trim();
-      // Skip skills without a category or with "Uncategorized"
       if (!category || category.toLowerCase() === "uncategorized") return;
       if (!grouped.has(category)) {
         grouped.set(category, []);
@@ -35,32 +35,39 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
       className="cv-page p-8 shadow-lg w-[210mm] mx-auto print:mx-0 print:shadow-none font-sans"
       style={{
         minHeight: "297mm",
-        color: "#374151", // Base text color
         backgroundColor: style.backgroundColor,
         backgroundImage:
           style.backgroundPattern !== "none" ? style.backgroundPattern : "none",
         backgroundSize:
           style.backgroundPattern !== "none" ? "24px 24px" : "auto",
+        color: "#374151",
       }}
     >
-      {/* Header Section */}
-      <header className="relative pb-6 mb-6">
+      {/* Header with creative design */}
+      <header className="relative pb-6 mb-8">
         <div
-          className="absolute top-24 left-0 w-full h-1"
+          className="absolute top-0 left-0 w-32 h-32 -z-10 opacity-10 rounded-full"
           style={{ backgroundColor: style.primaryColor }}
-        ></div>
+        />
+        <div
+          className="absolute top-8 left-8 w-24 h-24 -z-10 opacity-10 rounded-full"
+          style={{ backgroundColor: style.primaryColor }}
+        />
         <h1
-          className="text-4xl font-bold mt-4"
+          className="text-4xl font-bold tracking-tight relative"
           style={{ color: style.primaryColor }}
         >
           {data.personalInfo?.fullName}
         </h1>
         {data.personalInfo?.title && (
-          <h2 className="text-xl mt-1" style={{ color: "#4B5563" }}>
+          <h2 className="text-xl mt-2" style={{ color: "#4B5563" }}>
             {data.personalInfo.title}
           </h2>
         )}
-        <div className="flex flex-wrap gap-4 mt-3" style={{ color: "#6B7280" }}>
+        <div
+          className="mt-4 flex flex-wrap gap-6 text-sm"
+          style={{ color: "#6B7280" }}
+        >
           {data.personalInfo?.email && (
             <div className="flex items-center gap-1">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -90,8 +97,8 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               <span>{data.personalInfo.location}</span>
             </div>
           )}
-        </div>{" "}
-        <div className="flex gap-4 mt-3">
+        </div>
+        <div className="mt-3 flex gap-4">
           {data.personalInfo?.linkedin && (
             <a
               href={data.personalInfo.linkedin}
@@ -114,20 +121,12 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               GitHub
             </a>
           )}
-          {data.personalInfo?.website && (
-            <a
-              href={data.personalInfo.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity"
-              style={{ color: style.primaryColor }}
-            >
-              Website
-            </a>
-          )}
         </div>
         {data.personalInfo?.summary && (
-          <p className="mt-4 text-gray-700 leading-relaxed">
+          <p
+            className="mt-6 text-base leading-relaxed max-w-3xl"
+            style={{ color: "#4B5563" }}
+          >
             {data.personalInfo.summary}
           </p>
         )}
@@ -137,59 +136,54 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
         {/* Experience Section */}
         {data.experience && data.experience.length > 0 && (
           <section>
-            <h2
-              className="text-2xl font-semibold mb-4 pb-2 border-b-2"
-              style={{
-                color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
-              }}
-            >
-              Experience
-            </h2>
-            <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <h2
+                className="text-2xl font-bold"
+                style={{ color: style.primaryColor }}
+              >
+                Experience
+              </h2>
+              <div
+                className="flex-grow h-px opacity-20"
+                style={{ backgroundColor: style.primaryColor }}
+              />
+            </div>
+            <div className="space-y-6">
               {data.experience.map((exp) => (
                 <div
                   key={exp.id}
-                  className="p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="p-4 rounded-lg relative"
                   style={{
+                    backgroundColor: `${style.primaryColor}05`,
                     borderLeft: `3px solid ${style.primaryColor}`,
-                    backgroundColor: "white",
                   }}
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <h3
                         className="text-lg font-semibold"
-                        style={{ color: "#374151" }}
+                        style={{ color: style.primaryColor }}
                       >
                         {exp.position}
                       </h3>
-                      <h4 style={{ color: style.primaryColor }}>
+                      <h4 className="font-medium" style={{ color: "#4B5563" }}>
                         {exp.company}
                       </h4>
                     </div>
-                    <div
-                      style={{ color: "#6B7280" }}
-                      className="text-sm whitespace-nowrap"
-                    >
+                    <div className="text-sm" style={{ color: "#6B7280" }}>
                       {exp.startDate} - {exp.endDate || "Present"}
                     </div>
                   </div>
-                  {exp.location && (
-                    <div className="text-sm mt-1" style={{ color: "#6B7280" }}>
-                      {exp.location}
-                    </div>
-                  )}
                   {exp.description && (
                     <p
-                      className="mt-2 whitespace-pre-line"
+                      className="mt-2 text-base whitespace-pre-line"
                       style={{ color: "#4B5563" }}
                     >
                       {exp.description}
                     </p>
                   )}
                   {exp.achievements && exp.achievements.length > 0 && (
-                    <ul className="list-disc list-inside mt-2 space-y-1">
+                    <ul className="mt-2 space-y-1 list-disc list-inside">
                       {exp.achievements.map((achievement, index) => (
                         <li key={index} style={{ color: "#4B5563" }}>
                           {achievement}
@@ -202,7 +196,7 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                       {exp.technologies.map((tech, index) => (
                         <span
                           key={index}
-                          className="text-sm px-2 py-1 rounded"
+                          className="text-sm px-2 py-0.5 rounded-full"
                           style={{
                             backgroundColor: `${style.primaryColor}15`,
                             color: style.primaryColor,
@@ -219,90 +213,32 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
           </section>
         )}
 
-        {/* Education Section */}
-        {data.education && data.education.length > 0 && (
-          <section>
-            <h2
-              className="text-2xl font-semibold mb-4 pb-2 border-b-2"
-              style={{
-                color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
-              }}
-            >
-              Education
-            </h2>
-            <div className="space-y-4">
-              {data.education.map((edu) => (
-                <div
-                  key={edu.id}
-                  className="p-4 rounded-lg hover:bg-gray-50 transition-colors"
-                  style={{
-                    borderLeft: `3px solid ${style.primaryColor}`,
-                    backgroundColor: "white",
-                  }}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3
-                        className="text-lg font-semibold"
-                        style={{ color: "#374151" }}
-                      >
-                        {edu.school}
-                      </h3>
-                      <h4 style={{ color: style.primaryColor }}>
-                        {edu.degree} in {edu.fieldOfStudy}
-                      </h4>
-                    </div>
-                    <div
-                      style={{ color: "#6B7280" }}
-                      className="text-sm whitespace-nowrap"
-                    >
-                      {edu.startDate} - {edu.endDate || "Present"}
-                    </div>
-                  </div>
-                  {edu.location && (
-                    <div className="text-sm mt-1" style={{ color: "#6B7280" }}>
-                      {edu.location}
-                    </div>
-                  )}
-                  {edu.description && (
-                    <p
-                      className="mt-2 whitespace-pre-line"
-                      style={{ color: "#4B5563" }}
-                    >
-                      {edu.description}
-                    </p>
-                  )}
-                  {edu.gpa && (
-                    <div className="mt-2 text-sm" style={{ color: "#6B7280" }}>
-                      GPA: {edu.gpa}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* Skills Section */}
         {data.skills && data.skills.length > 0 && (
           <section>
-            <h2
-              className="text-2xl font-semibold mb-4 pb-2 border-b-2"
-              style={{
-                color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
-              }}
-            >
-              Skills
-            </h2>
-            <div className="space-y-6">
+            <div className="flex items-center gap-2 mb-4">
+              <h2
+                className="text-2xl font-bold"
+                style={{ color: style.primaryColor }}
+              >
+                Skills
+              </h2>
+              <div
+                className="flex-grow h-px opacity-20"
+                style={{ backgroundColor: style.primaryColor }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-6">
               {Array.from(skillsByCategory.entries()).map(
                 ([category, skills]) => (
-                  <div key={category}>
+                  <div
+                    key={category}
+                    className="p-4 rounded-lg"
+                    style={{ backgroundColor: `${style.primaryColor}05` }}
+                  >
                     <h3
-                      className="text-lg font-medium mb-3"
-                      style={{ color: "#374151" }}
+                      className="text-lg font-semibold mb-3"
+                      style={{ color: style.primaryColor }}
                     >
                       {category}
                     </h3>
@@ -330,63 +266,44 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
           </section>
         )}
 
-        {/* Projects Section */}
-        {data.projects && data.projects.length > 0 && (
+        {/* Education Section */}
+        {data.education && data.education.length > 0 && (
           <section>
-            {" "}
-            <h2
-              className="text-2xl font-semibold mb-4 pb-2 border-b-2"
-              style={{
-                color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
-              }}
-            >
-              Projects
-            </h2>
-            <div className="space-y-4">
-              {data.projects.map((project) => (
+            <div className="flex items-center gap-2 mb-4">
+              <h2
+                className="text-2xl font-bold"
+                style={{ color: style.primaryColor }}
+              >
+                Education
+              </h2>
+              <div
+                className="flex-grow h-px opacity-20"
+                style={{ backgroundColor: style.primaryColor }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              {data.education.map((edu) => (
                 <div
-                  key={project.id}
-                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                  key={edu.id}
+                  className="p-4 rounded-lg"
+                  style={{ backgroundColor: `${style.primaryColor}05` }}
                 >
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {project.link ? (
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          {project.name}
-                        </a>
-                      ) : (
-                        project.name
-                      )}
-                    </h3>
-                    {(project.startDate || project.endDate) && (
-                      <div className="text-gray-500 text-sm whitespace-nowrap">
-                        {project.startDate && project.startDate}
-                        {project.endDate && ` - ${project.endDate}`}
-                      </div>
-                    )}
+                  <h3
+                    className="font-semibold"
+                    style={{ color: style.primaryColor }}
+                  >
+                    {edu.school}
+                  </h3>
+                  <div className="text-base mt-1" style={{ color: "#4B5563" }}>
+                    {edu.degree} in {edu.fieldOfStudy}
                   </div>
-                  {project.description && (
-                    <p className="mt-2 text-gray-700 whitespace-pre-line">
-                      {project.description}
+                  <div className="text-sm mt-1" style={{ color: "#6B7280" }}>
+                    {edu.startDate} - {edu.endDate || "Present"}
+                  </div>
+                  {edu.description && (
+                    <p className="mt-2 text-sm" style={{ color: "#4B5563" }}>
+                      {edu.description}
                     </p>
-                  )}
-                  {project.technologies && project.technologies.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {project.technologies.map((tech, index) => (
-                        <span
-                          key={index}
-                          className="text-sm bg-blue-50 text-blue-600 px-2 py-1 rounded"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
                   )}
                 </div>
               ))}

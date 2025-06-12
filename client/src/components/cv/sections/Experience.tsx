@@ -22,15 +22,18 @@ export const Experience = () => {
 
   const handleAddExperience = () => {
     const newExperience: ExperienceType = {
-      id: String(Date.now()),
+      id: generateId("exp"),
       company: "",
       position: "",
       startDate: "",
+      endDate: "",
       location: "",
       description: "",
+      achievements: [],
+      technologies: [],
     };
     updateCV("experience", [...(cv?.experience || []), newExperience]);
-    setIsCollapsed(false); // Expand section when adding new experience
+    setIsCollapsed(false);
   };
 
   const handleDeleteExperience = (index: number) => {
@@ -41,7 +44,7 @@ export const Experience = () => {
   const handleUpdateExperience = (
     index: number,
     field: keyof ExperienceType,
-    value: string
+    value: string | string[]
   ) => {
     if (!cv?.experience) return;
     const updatedExperience = [...cv.experience];
@@ -52,12 +55,28 @@ export const Experience = () => {
     updateCV("experience", updatedExperience);
   };
 
+  const handleAchievementsChange = (index: number, value: string) => {
+    const achievements = value
+      .split("\n")
+      .map((item) => item.trim())
+      .filter((item) => item !== "");
+    handleUpdateExperience(index, "achievements", achievements);
+  };
+
+  const handleTechnologiesChange = (index: number, value: string) => {
+    const technologies = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item !== "");
+    handleUpdateExperience(index, "technologies", technologies);
+  };
+
   const addButton = (
     <button
       onClick={handleAddExperience}
-      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
     >
-      <FaPlus /> Add new
+      <FaPlus className="text-white" /> Add Experience
     </button>
   );
 
@@ -71,116 +90,188 @@ export const Experience = () => {
       />
 
       <div
-        className={`space-y-4 transition-all duration-300 ease-in-out ${
+        className={`space-y-6 transition-all duration-300 ease-in-out ${
           isCollapsed ? "hidden" : ""
         }`}
       >
         {cv?.experience?.map((exp, idx) => (
           <div
             key={exp.id}
-            className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            className="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm"
           >
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-medium text-gray-700">
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 Experience #{idx + 1}
               </h3>
               <button
                 onClick={() => handleDeleteExperience(idx)}
-                className="text-red-500 hover:text-red-700 transition-colors"
+                className="text-red-500 hover:text-red-700 transition-colors p-1"
+                title="Delete experience"
               >
                 <FaTrash />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div className="space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-                    <FaBuilding />
-                  </div>
-                  <Input
-                    label="Company"
-                    placeholder="e.g. Google"
-                    value={exp.company}
-                    onChange={(e) =>
-                      handleUpdateExperience(idx, "company", e.target.value)
-                    }
-                    className="pl-10"
-                  />
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-                    <FaBriefcase />
-                  </div>
-                  <Input
-                    label="Position"
-                    placeholder="e.g. Software Engineer"
-                    value={exp.position}
-                    onChange={(e) =>
-                      handleUpdateExperience(idx, "position", e.target.value)
-                    }
-                    className="pl-10"
-                  />
-                </div>
+                <Input
+                  name={`company-${exp.id}`}
+                  label="Company Name"
+                  placeholder="e.g. Google"
+                  icon={<FaBuilding />}
+                  value={exp.company}
+                  onChange={(e) =>
+                    handleUpdateExperience(idx, "company", e.target.value)
+                  }
+                  hint="The name of the company you worked for"
+                />
+                <Input
+                  name={`position-${exp.id}`}
+                  label="Job Title"
+                  placeholder="e.g. Senior Software Engineer"
+                  icon={<FaBriefcase />}
+                  value={exp.position}
+                  onChange={(e) =>
+                    handleUpdateExperience(idx, "position", e.target.value)
+                  }
+                  hint="Your role at the company"
+                />
               </div>
               <div className="space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-                    <FaMapMarkerAlt />
-                  </div>
+                <Input
+                  name={`location-${exp.id}`}
+                  label="Location"
+                  placeholder="e.g. San Francisco, CA"
+                  icon={<FaMapMarkerAlt />}
+                  value={exp.location || ""}
+                  onChange={(e) =>
+                    handleUpdateExperience(idx, "location", e.target.value)
+                  }
+                  hint="City and country/state of the job"
+                />
+                <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Location"
-                    placeholder="e.g. San Francisco, CA"
-                    value={exp.location}
-                    onChange={(e) =>
-                      handleUpdateExperience(idx, "location", e.target.value)
-                    }
-                    className="pl-10"
-                  />
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-                    <FaCalendar />
-                  </div>
-                  <Input
-                    label="Period"
-                    placeholder="e.g. Jan 2020 - Present"
-                    value={
-                      exp.endDate
-                        ? `${exp.startDate} - ${exp.endDate}`
-                        : exp.startDate || ""
-                    }
+                    name={`startDate-${exp.id}`}
+                    label="Start Date"
+                    placeholder="MM/YYYY"
+                    icon={<FaCalendar />}
+                    value={exp.startDate}
                     onChange={(e) =>
                       handleUpdateExperience(idx, "startDate", e.target.value)
                     }
-                    className="pl-10"
+                    hint="When you started"
+                  />
+                  <Input
+                    name={`endDate-${exp.id}`}
+                    label="End Date"
+                    placeholder="MM/YYYY or Present"
+                    icon={<FaCalendar />}
+                    value={exp.endDate || ""}
+                    onChange={(e) =>
+                      handleUpdateExperience(idx, "endDate", e.target.value)
+                    }
+                    hint="When you left"
                   />
                 </div>
               </div>
-              <div className="col-span-2">
-                <Input
-                  label="Description"
-                  placeholder="Brief description of your role and achievements"
+            </div>
+
+            {/* Description and Details */}
+            <div className="space-y-4">
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Job Description
+                </label>
+                <textarea
+                  name={`description-${exp.id}`}
+                  placeholder="Describe your role, responsibilities, and key contributions..."
                   value={exp.description || ""}
                   onChange={(e) =>
                     handleUpdateExperience(idx, "description", e.target.value)
                   }
+                  className="w-full px-3 py-2.5 bg-white dark:bg-gray-900
+                    border border-gray-300 dark:border-gray-700 rounded-lg
+                    shadow-sm outline-none transition-all duration-200
+                    placeholder:text-gray-400 dark:placeholder:text-gray-500
+                    hover:border-gray-400 dark:hover:border-gray-600
+                    focus:border-primary-500 focus:ring-1 focus:ring-primary-500
+                    dark:focus:border-primary-500 dark:focus:ring-primary-500/20
+                    min-h-[100px] resize-y"
                 />
+                <p className="mt-1.5 text-sm text-gray-500">
+                  Provide a clear overview of your role and responsibilities
+                </p>
+              </div>
+
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Key Achievements
+                </label>
+                <textarea
+                  name={`achievements-${exp.id}`}
+                  placeholder="• Increased revenue by 25%
+• Led a team of 5 developers
+• Implemented new feature that..."
+                  value={(exp.achievements || []).join("\n")}
+                  onChange={(e) =>
+                    handleAchievementsChange(idx, e.target.value)
+                  }
+                  className="w-full px-3 py-2.5 bg-white dark:bg-gray-900
+                    border border-gray-300 dark:border-gray-700 rounded-lg
+                    shadow-sm outline-none transition-all duration-200
+                    placeholder:text-gray-400 dark:placeholder:text-gray-500
+                    hover:border-gray-400 dark:hover:border-gray-600
+                    focus:border-primary-500 focus:ring-1 focus:ring-primary-500
+                    dark:focus:border-primary-500 dark:focus:ring-primary-500/20
+                    min-h-[100px] resize-y font-mono text-sm"
+                />
+                <p className="mt-1.5 text-sm text-gray-500">
+                  List your achievements one per line, starting with action
+                  verbs
+                </p>
+              </div>
+
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Technologies Used
+                </label>
+                <textarea
+                  name={`technologies-${exp.id}`}
+                  placeholder="React, TypeScript, Node.js, AWS..."
+                  value={(exp.technologies || []).join(", ")}
+                  onChange={(e) =>
+                    handleTechnologiesChange(idx, e.target.value)
+                  }
+                  className="w-full px-3 py-2.5 bg-white dark:bg-gray-900
+                    border border-gray-300 dark:border-gray-700 rounded-lg
+                    shadow-sm outline-none transition-all duration-200
+                    placeholder:text-gray-400 dark:placeholder:text-gray-500
+                    hover:border-gray-400 dark:hover:border-gray-600
+                    focus:border-primary-500 focus:ring-1 focus:ring-primary-500
+                    dark:focus:border-primary-500 dark:focus:ring-primary-500/20
+                    min-h-[60px] resize-y"
+                />
+                <p className="mt-1.5 text-sm text-gray-500">
+                  List technologies separated by commas
+                </p>
               </div>
             </div>
           </div>
         ))}
-      </div>
 
-      {(!cv?.experience || cv.experience.length === 0) && (
-        <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <p className="text-gray-500">
-            {" "}
-            No experience yet. Click &quot;Add new experience&quot; to get
-            started.
-          </p>
-        </div>
-      )}
+        {(!cv?.experience || cv.experience.length === 0) && (
+          <div className="text-center py-8 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            <div className="flex flex-col items-center gap-2">
+              <FaBriefcase className="text-gray-400 dark:text-gray-600 text-2xl" />{" "}
+              <p className="text-gray-500 dark:text-gray-400">
+                No experience added yet. Click &quot;Add Experience&quot; to get
+                started.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </section>
   );
 };

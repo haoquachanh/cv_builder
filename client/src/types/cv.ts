@@ -37,11 +37,11 @@ export interface Experience {
 export interface Skill {
   id: string;
   name: string;
+  category?: string;
   color?: string;
   fontStyle?: "normal" | "italic";
   fontWeight?: "normal" | "bold";
   textDecoration?: "none" | "underline";
-  category?: string;
 }
 
 export interface Project {
@@ -57,7 +57,6 @@ export interface Project {
 
 export interface CVStyle {
   primaryColor: string;
-  fontFamily: string;
   backgroundColor: string;
   backgroundPattern?: string;
 }

@@ -14,6 +14,8 @@ import {
   FaLinkedin,
   FaGithub,
   FaGlobe,
+  FaBriefcase,
+  FaInfoCircle,
 } from "react-icons/fa";
 
 export const PersonalInfo = () => {
@@ -41,97 +43,142 @@ export const PersonalInfo = () => {
       />
 
       <div
-        className={`space-y-4 transition-all duration-300 ease-in-out ${
+        className={`space-y-8 transition-all duration-300 ease-in-out ${
           isCollapsed ? "hidden" : ""
         }`}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-              <FaUser />
-            </div>
+        {/* Basic Information */}
+        <fieldset className="space-y-4">
+          <legend className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <FaUser className="text-gray-400" />
+            Basic Information
+          </legend>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
+              name="fullName"
               label="Full Name"
               placeholder="Enter your full name"
+              icon={<FaUser />}
               value={cv?.personalInfo?.fullName || ""}
               onChange={(e) => handleChange("fullName", e.target.value)}
-              className="pl-10"
+              hint="Enter your name as you'd like it to appear on your CV"
+            />
+            <Input
+              name="title"
+              label="Professional Title"
+              placeholder="e.g. Senior Software Engineer"
+              icon={<FaBriefcase />}
+              value={cv?.personalInfo?.title || ""}
+              onChange={(e) => handleChange("title", e.target.value)}
+              hint="Your current job title or professional role"
             />
           </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-              <FaEnvelope />
-            </div>
+        </fieldset>
+
+        {/* Contact Information */}
+        <fieldset className="space-y-4">
+          <legend className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <FaEnvelope className="text-gray-400" />
+            Contact Information
+          </legend>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
+              name="email"
               label="Email"
               type="email"
               placeholder="example@mail.com"
+              icon={<FaEnvelope />}
               value={cv?.personalInfo?.email || ""}
               onChange={(e) => handleChange("email", e.target.value)}
-              className="pl-10"
+              hint="Your primary contact email"
             />
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-              <FaPhone />
-            </div>
             <Input
+              name="phone"
               label="Phone"
-              placeholder="e.g. +123 456 789"
+              placeholder="+1 (234) 567-8900"
+              icon={<FaPhone />}
               value={cv?.personalInfo?.phone || ""}
               onChange={(e) => handleChange("phone", e.target.value)}
-              className="pl-10"
+              hint="Include your country code"
             />
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-              <FaMapMarkerAlt />
-            </div>
             <Input
+              name="location"
               label="Location"
               placeholder="City, Country"
+              icon={<FaMapMarkerAlt />}
               value={cv?.personalInfo?.location || ""}
               onChange={(e) => handleChange("location", e.target.value)}
-              className="pl-10"
+              hint="Your current location or preferred work location"
             />
           </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-              <FaLinkedin />
-            </div>
+        </fieldset>
+
+        {/* Online Presence */}
+        <fieldset className="space-y-4">
+          <legend className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <FaGlobe className="text-gray-400" />
+            Online Presence
+          </legend>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="LinkedIn"
-              placeholder="LinkedIn profile URL"
+              name="linkedin"
+              label="LinkedIn Profile"
+              placeholder="https://linkedin.com/in/yourprofile"
+              icon={<FaLinkedin />}
               value={cv?.personalInfo?.linkedin || ""}
               onChange={(e) => handleChange("linkedin", e.target.value)}
-              className="pl-10"
+              hint="Full URL to your LinkedIn profile"
             />
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-              <FaGithub />
-            </div>
             <Input
-              label="GitHub"
-              placeholder="GitHub profile URL"
+              name="github"
+              label="GitHub Profile"
+              placeholder="https://github.com/yourusername"
+              icon={<FaGithub />}
               value={cv?.personalInfo?.github || ""}
               onChange={(e) => handleChange("github", e.target.value)}
-              className="pl-10"
+              hint="Full URL to your GitHub profile"
             />
-          </div>
-          <div className="relative col-span-2">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
-              <FaGlobe />
-            </div>
             <Input
+              name="website"
               label="Personal Website"
-              placeholder="Your website URL"
+              placeholder="https://yourwebsite.com"
+              icon={<FaGlobe />}
               value={cv?.personalInfo?.website || ""}
               onChange={(e) => handleChange("website", e.target.value)}
-              className="pl-10"
+              hint="Your portfolio or personal website URL"
             />
           </div>
-        </div>
+        </fieldset>
+
+        {/* Professional Summary */}
+        <fieldset className="space-y-4">
+          <legend className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <FaInfoCircle className="text-gray-400" />
+            Professional Summary
+          </legend>
+          <div className="grid grid-cols-1 gap-6">
+            <div className="col-span-full">
+              <textarea
+                name="summary"
+                placeholder="Write a brief summary of your professional background and career objectives..."
+                value={cv?.personalInfo?.summary || ""}
+                onChange={(e) => handleChange("summary", e.target.value)}
+                className="w-full px-3 py-2.5 bg-white dark:bg-gray-900
+                  border border-gray-300 dark:border-gray-700 rounded-lg
+                  shadow-sm outline-none transition-all duration-200
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  hover:border-gray-400 dark:hover:border-gray-600
+                  focus:border-primary-500 focus:ring-1 focus:ring-primary-500
+                  dark:focus:border-primary-500 dark:focus:ring-primary-500/20
+                  min-h-[120px] resize-y"
+              />
+              <p className="mt-1.5 text-sm text-gray-500">
+                Keep your summary concise and impactful. Highlight your key
+                strengths and career goals.
+              </p>
+            </div>
+          </div>
+        </fieldset>
       </div>
     </section>
   );

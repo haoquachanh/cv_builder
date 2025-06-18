@@ -47,7 +47,6 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     };
 
     const TemplateComponent = getTemplateComponent(selectedTemplate);
-
     return (
       <div
         ref={containerRef}
@@ -59,28 +58,31 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
       >
         <div
           ref={ref}
+          data-cv-preview
+          className="inline-block min-w-full cv-document origin-top-center"
           style={{
             transform: `scale(${zoom})`,
-            transformOrigin: "top center",
           }}
-          className="inline-block min-w-full"
         >
-          <TemplateComponent
-            data={
-              cv || {
-                personalInfo: {
-                  fullName: "",
-                  email: "",
-                  phone: "",
-                  location: "",
-                },
-                education: [],
-                experience: [],
-                skills: [],
-                projects: [],
+          {/* A4 size paper with exact dimensions for accurate PDF export */}
+          <div className="w-[210mm] max-w-[210mm] min-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm] overflow-hidden print:shadow-none relative cv-export-container">
+            <TemplateComponent
+              data={
+                cv || {
+                  personalInfo: {
+                    fullName: "",
+                    email: "",
+                    phone: "",
+                    location: "",
+                  },
+                  education: [],
+                  experience: [],
+                  skills: [],
+                  projects: [],
+                }
               }
-            }
-          />
+            />
+          </div>
         </div>
       </div>
     );

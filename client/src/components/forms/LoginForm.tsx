@@ -61,13 +61,12 @@ export function LoginForm() {
           {error}
         </div>
       )}
-
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, errors, touched }) => (
+        {({ isSubmitting }) => (
           <Form className="space-y-6">
             <div>
               <div className="relative">
@@ -76,14 +75,9 @@ export function LoginForm() {
                   type="email"
                   placeholder="Email address"
                   icon={<FaEnvelope className="text-gray-400" />}
-                  error={
-                    touched.email && errors.email ? errors.email : undefined
-                  }
+                  formik={true}
                 />
               </div>
-              {touched.email && errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-              )}
             </div>
 
             <div>
@@ -93,25 +87,18 @@ export function LoginForm() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   icon={<FaLock className="text-gray-400" />}
-                  error={
-                    touched.password && errors.password
-                      ? errors.password
-                      : undefined
-                  }
+                  formik={true}
                   rightIcon={
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="text-gray-400 hover:text-gray-600"
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
                   }
                 />
               </div>
-              {touched.password && errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
-              )}
             </div>
 
             <div className="flex items-center justify-between text-sm">

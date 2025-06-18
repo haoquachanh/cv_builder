@@ -6,8 +6,6 @@
   .cv-page {
     width: 210mm;
     min-height: 297mm;
-    @apply bg-white shadow-lg p-8;
-    margin: auto;
   }
   
   .section-title {
@@ -34,20 +32,4 @@
 /* Dark mode styles */
 .dark {
   @apply bg-gray-900 text-white;
-}
-
-/* Print styles */
-@media print {
-  .cv-page {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-  }
-  
-  @page {
-    size: A4;
-    margin: 0;
-  }
 }

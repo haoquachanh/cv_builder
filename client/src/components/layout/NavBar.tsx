@@ -62,18 +62,21 @@ const Navbar = () => {
   const { user } = context;
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 w-full">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-row items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link
+            href="/"
+            className="flex items-center min-w-[160px] justify-center"
+          >
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
               CV Builder
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex flex-1 items-center justify-center space-x-8">
             {user ? (
               <>
                 <Link
@@ -117,7 +120,7 @@ const Navbar = () => {
 
           {/* User Menu (Desktop) */}
           {user && (
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center min-w-[220px] justify-end space-x-4">
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}

@@ -17,6 +17,7 @@ import {
   FaBriefcase,
   FaInfoCircle,
 } from "react-icons/fa";
+import { Button } from "@/components/common/Button";
 
 export const PersonalInfo = () => {
   const { cv, updateCV } = useCV();
@@ -34,12 +35,39 @@ export const PersonalInfo = () => {
     });
   };
 
+  const handleFillFromProfile = () => {
+    // Giả lập lấy thông tin từ profile (có thể thay bằng API thực tế)
+    const profile = {
+      fullName: "Nguyen Van A",
+      email: "nguyenvana@email.com",
+      phone: "+84 912 345 678",
+      location: "Hanoi, Vietnam",
+      title: "Frontend Developer",
+      linkedin: "https://linkedin.com/in/nguyenvana",
+      github: "https://github.com/nguyenvana",
+      website: "https://nguyenvana.dev",
+      summary:
+        "Experienced frontend developer with a passion for building beautiful and performant web applications.",
+    };
+    updateCV("personalInfo", { ...profile });
+  };
+
   return (
     <section className="space-y-6">
       <SectionHeader
         title="Personal Information"
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
+        actionButton={
+          <Button
+            type="button"
+            variant="primary"
+            className="ml-4 px-3 py-1.5 text-xs font-medium"
+            onClick={handleFillFromProfile}
+          >
+            Fill from Profile
+          </Button>
+        }
       />
 
       <div

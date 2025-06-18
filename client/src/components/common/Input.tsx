@@ -45,7 +45,11 @@ const RegularInput: React.FC<BaseInputProps> = ({
             placeholder:text-gray-400 dark:placeholder:text-gray-500
             ${icon ? "pl-10" : ""}
             ${rightIcon ? "pr-10" : ""}
-            ${error ? "border-red-300 dark:border-red-700" : "hover:border-gray-400 dark:hover:border-gray-600"}
+            ${
+              error
+                ? "border-red-300 dark:border-red-700"
+                : "hover:border-gray-400 dark:hover:border-gray-600"
+            }
             focus:border-primary-500 focus:ring-1 focus:ring-primary-500
             dark:focus:border-primary-500 dark:focus:ring-primary-500/20
             ${className}
@@ -78,6 +82,25 @@ const FormikInput: React.FC<BaseInputProps> = ({
 }) => {
   const [field, meta] = useField(props.name);
   const showError = meta.touched && meta.error;
+  const isCheckbox = props.type === "checkbox";
+
+  if (isCheckbox) {
+    return (
+      <div className="space-y-1.5">
+        <input
+          {...field}
+          {...props}
+          checked={field.value}
+          className={`h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${className}`}
+        />
+        {showError && (
+          <p className="mt-1 text-sm text-red-600 dark:text-red-500">
+            {meta.error}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-1.5">
@@ -105,7 +128,11 @@ const FormikInput: React.FC<BaseInputProps> = ({
             placeholder:text-gray-400 dark:placeholder:text-gray-500
             ${icon ? "pl-10" : ""}
             ${rightIcon ? "pr-10" : ""}
-            ${showError ? "border-red-300 dark:border-red-700" : "hover:border-gray-400 dark:hover:border-gray-600"}
+            ${
+              showError
+                ? "border-red-300 dark:border-red-700"
+                : "hover:border-gray-400 dark:hover:border-gray-600"
+            }
             focus:border-primary-500 focus:ring-1 focus:ring-primary-500
             dark:focus:border-primary-500 dark:focus:ring-primary-500/20
             ${className}

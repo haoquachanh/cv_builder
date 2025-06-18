@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Project } from "@/types/cv";
 import { useCV } from "@/context/CVContext";
 import { Input } from "@/components/common/Input";
+import { Button } from "@/components/common/Button";
 import {
   FaTrash,
   FaCalendar,
@@ -104,15 +105,13 @@ export const Projects = () => {
   };
 
   const addButton = (
-    <button
+    <Button
       onClick={handleAddProject}
-      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white
-        rounded-lg hover:bg-blue-600 transition-colors duration-200
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      variant="primary"
+      className="flex items-center gap-2 px-4 py-2 text-sm"
     >
-      <FaPlus />
-      Add Project
-    </button>
+      <FaPlus /> Add Project
+    </Button>
   );
 
   if (isCollapsed && (!cv?.projects || cv.projects.length === 0)) {
@@ -132,14 +131,14 @@ export const Projects = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Project #{idx + 1}
               </h3>
-              <button
+              <Button
                 onClick={() => handleDeleteProject(idx)}
-                className="text-red-500 hover:text-red-700 transition-colors p-2
-                focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                rounded-full"
+                variant="outline"
+                className="text-red-500 hover:text-red-700 transition-colors p-2 border-none rounded-full"
+                title="Delete project"
               >
                 <FaTrash />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-6">

@@ -7,6 +7,7 @@ export const Button: React.FC<ButtonProps> = ({
   variant = "primary",
   // size = "md",
   className,
+  disabled = false,
   ...props
 }) => {
   const baseStyles = "font-medium rounded-lg transition-colors";
@@ -16,9 +17,14 @@ export const Button: React.FC<ButtonProps> = ({
     outline: "border-2 border-blue-600 text-blue-600 hover:bg-blue-50",
   };
 
+  const disabledStyles = disabled
+    ? "opacity-15 pointer-events-none !cursor-default !hover:none"
+    : "";
+
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${className}`}
+      className={`${baseStyles} ${variants[variant]} ${className} py-0.5 px-1.5 cursor-pointer ${disabledStyles}`}
+      disabled={disabled}
       {...props}
     >
       {children}

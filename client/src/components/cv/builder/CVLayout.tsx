@@ -27,7 +27,10 @@ export const CVLayout: React.FC = () => {
           ref={builderRef}
           onScroll={(e) => handleScroll("builder", e.currentTarget.scrollTop)}
         >
-          <CVBuilder className="bg-white rounded-lg shadow-sm" />
+          <CVBuilder
+            key={JSON.stringify(cv)}
+            className="bg-white rounded-lg shadow-sm"
+          />
         </div>
         <div
           className="lg:w-1/2"

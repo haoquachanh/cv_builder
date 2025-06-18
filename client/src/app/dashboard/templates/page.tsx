@@ -12,7 +12,7 @@ const templates = [
     downloads: "2.3k",
     rating: 4.8,
     views: "12k",
-    image: "/templates/modern-template.png",
+    image: "/preview-cv.png", // Using default preview image temporarily
   },
   {
     id: "creative",
@@ -21,7 +21,7 @@ const templates = [
     downloads: "1.8k",
     rating: 4.7,
     views: "10k",
-    image: "/templates/creative-template.png",
+    image: "/preview-cv.png", // Using default preview image temporarily
   },
   {
     id: "minimal",
@@ -30,17 +30,27 @@ const templates = [
     downloads: "1.5k",
     rating: 4.6,
     views: "8k",
-    image: "/templates/minimal-template.png",
+    image: "/preview-cv.png", // Using default preview image temporarily
   },
   {
-    id: "executive",
-    name: "Executive Classic",
+    id: "compact",
+    name: "Compact Professional",
+    description:
+      "Space-efficient design that fits more content while maintaining readability",
+    downloads: "1.4k",
+    rating: 4.6,
+    views: "7.5k",
+    image: "/preview-cv.png", // Using default preview image temporarily
+  },
+  {
+    id: "classic",
+    name: "Classic Executive",
     description:
       "Traditional layout perfect for corporate and business professionals",
     downloads: "1.2k",
     rating: 4.5,
     views: "7k",
-    image: "/templates/executive-template.png",
+    image: "/preview-cv.png", // Using default preview image temporarily
   },
 ];
 

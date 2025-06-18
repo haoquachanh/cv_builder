@@ -29,21 +29,29 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
     });
     return grouped;
   }, [data.skills]);
-
   return (
     <div
       className="cv-page p-8 shadow-lg w-[210mm] mx-auto print:mx-0 print:shadow-none font-sans"
       style={{
+        width: "210mm",
         minHeight: "297mm",
+        maxHeight: "297mm",
+        height: "297mm",
         color: "#374151", // Base text color
         backgroundColor: style.backgroundColor,
         backgroundImage:
           style.backgroundPattern !== "none" ? style.backgroundPattern : "none",
         backgroundSize:
           style.backgroundPattern !== "none" ? "24px 24px" : "auto",
+        boxSizing: "border-box",
+        overflow: "hidden",
+        pageBreakInside: "avoid",
+        pageBreakBefore: "avoid",
+        pageBreakAfter: "avoid",
+        breakInside: "avoid",
       }}
     >
-      {/* Header Section */}{" "}
+      {/* Header Section */}
       <header
         className="pb-6 mb-6 border-b"
         style={{ borderColor: `${style.primaryColor}20` }}
@@ -115,7 +123,6 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
         {/* Experience Section */}
         {data.experience && data.experience.length > 0 && (
           <section>
-            {" "}
             <h2
               className="text-base font-medium uppercase tracking-wider mb-4"
               style={{ color: style.primaryColor }}
@@ -157,7 +164,7 @@ export const MinimalTemplate: React.FC<{ data: CV }> = ({ data }) => {
                         </li>
                       ))}
                     </ul>
-                  )}{" "}
+                  )}
                   {exp.technologies && exp.technologies.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {exp.technologies.map((tech, index) => (

@@ -15,6 +15,7 @@ import {
   FaPlus,
   FaTrash,
 } from "react-icons/fa";
+import { Button } from "@/components/common/Button";
 
 export const Experience = () => {
   const { cv, updateCV } = useCV();
@@ -72,12 +73,13 @@ export const Experience = () => {
   };
 
   const addButton = (
-    <button
+    <Button
       onClick={handleAddExperience}
-      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+      variant="primary"
+      className="flex items-center gap-2 px-4 py-2 text-sm"
     >
       <FaPlus className="text-white" /> Add Experience
-    </button>
+    </Button>
   );
 
   return (
@@ -103,13 +105,14 @@ export const Experience = () => {
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 Experience #{idx + 1}
               </h3>
-              <button
+              <Button
                 onClick={() => handleDeleteExperience(idx)}
-                className="text-red-500 hover:text-red-700 transition-colors p-1"
+                variant="outline"
+                className="text-red-500 hover:text-red-700 transition-colors p-1 border-none"
                 title="Delete experience"
               >
                 <FaTrash />
-              </button>
+              </Button>
             </div>
 
             {/* Basic Information */}
@@ -263,7 +266,7 @@ export const Experience = () => {
         {(!cv?.experience || cv.experience.length === 0) && (
           <div className="text-center py-8 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
             <div className="flex flex-col items-center gap-2">
-              <FaBriefcase className="text-gray-400 dark:text-gray-600 text-2xl" />{" "}
+              <FaBriefcase className="text-gray-400 dark:text-gray-600 text-2xl" />
               <p className="text-gray-500 dark:text-gray-400">
                 No experience added yet. Click &quot;Add Experience&quot; to get
                 started.

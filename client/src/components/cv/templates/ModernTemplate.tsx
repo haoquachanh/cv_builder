@@ -32,22 +32,33 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
 
   return (
     <div
-      className="cv-page p-8 shadow-lg w-[210mm] mx-auto print:mx-0 print:shadow-none font-sans"
+      className={[
+        "cv-page",
+        "p-8",
+        "shadow-lg",
+        "w-[210mm]",
+        "mx-auto",
+        "print:shadow-none",
+        "font-sans",
+        style.backgroundColor ? "" : "bg-white",
+        style.backgroundPattern !== "none" ? "" : "",
+      ].join(" ")}
       style={{
         minHeight: "297mm",
-        color: "#374151", // Base text color
         backgroundColor: style.backgroundColor,
         backgroundImage:
-          style.backgroundPattern !== "none" ? style.backgroundPattern : "none",
+          style.backgroundPattern !== "none"
+            ? style.backgroundPattern
+            : undefined,
         backgroundSize:
-          style.backgroundPattern !== "none" ? "24px 24px" : "auto",
+          style.backgroundPattern !== "none" ? "24px 24px" : undefined,
       }}
     >
       {/* Header Section */}
       <header className="relative pb-6 mb-6">
         <div
-          className="absolute top-24 left-0 w-full h-1"
-          style={{ backgroundColor: style.primaryColor }}
+          className="absolute top-52 left-0 w-full h-1" // giảm top từ 16 xuống 10
+          style={{ backgroundColor: style.primaryColor, opacity: 0.85 }}
         ></div>
         <h1
           className="text-4xl font-bold mt-4"
@@ -56,11 +67,11 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
           {data.personalInfo?.fullName}
         </h1>
         {data.personalInfo?.title && (
-          <h2 className="text-xl mt-1" style={{ color: "#4B5563" }}>
+          <h2 className="text-xl mt-1" style={{ color: "#334155" }}>
             {data.personalInfo.title}
           </h2>
         )}
-        <div className="flex flex-wrap gap-4 mt-3" style={{ color: "#6B7280" }}>
+        <div className="flex flex-wrap gap-4 mt-3" style={{ color: "#475569" }}>
           {data.personalInfo?.email && (
             <div className="flex items-center gap-1">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -90,15 +101,15 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               <span>{data.personalInfo.location}</span>
             </div>
           )}
-        </div>{" "}
+        </div>
         <div className="flex gap-4 mt-3">
           {data.personalInfo?.linkedin && (
             <a
               href={data.personalInfo.linkedin}
               target="_blank"
               rel="noopener noreferrer"
+              style={{ color: style.primaryColor, opacity: 0.9 }}
               className="hover:opacity-80 transition-opacity"
-              style={{ color: style.primaryColor }}
             >
               LinkedIn
             </a>
@@ -108,8 +119,8 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               href={data.personalInfo.github}
               target="_blank"
               rel="noopener noreferrer"
+              style={{ color: style.primaryColor, opacity: 0.9 }}
               className="hover:opacity-80 transition-opacity"
-              style={{ color: style.primaryColor }}
             >
               GitHub
             </a>
@@ -119,15 +130,15 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               href={data.personalInfo.website}
               target="_blank"
               rel="noopener noreferrer"
+              style={{ color: style.primaryColor, opacity: 0.9 }}
               className="hover:opacity-80 transition-opacity"
-              style={{ color: style.primaryColor }}
             >
               Website
             </a>
           )}
         </div>
         {data.personalInfo?.summary && (
-          <p className="mt-4 text-gray-700 leading-relaxed">
+          <p className="mt-4" style={{ color: "#334155", lineHeight: 1.6 }}>
             {data.personalInfo.summary}
           </p>
         )}
@@ -141,7 +152,7 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               className="text-2xl font-semibold mb-4 pb-2 border-b-2"
               style={{
                 color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
+                borderColor: style.primaryColor + "33",
               }}
             >
               Experience
@@ -150,17 +161,17 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               {data.experience.map((exp) => (
                 <div
                   key={exp.id}
-                  className="p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="p-4 rounded-lg transition-colors border-l-4 bg-white"
                   style={{
-                    borderLeft: `3px solid ${style.primaryColor}`,
-                    backgroundColor: "white",
+                    borderLeftColor: style.primaryColor,
+                    boxShadow: "0 1px 4px #e2e8f0",
                   }}
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <h3
                         className="text-lg font-semibold"
-                        style={{ color: "#374151" }}
+                        style={{ color: "#0f172a" }}
                       >
                         {exp.position}
                       </h3>
@@ -169,21 +180,21 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                       </h4>
                     </div>
                     <div
-                      style={{ color: "#6B7280" }}
                       className="text-sm whitespace-nowrap"
+                      style={{ color: "#64748b" }}
                     >
                       {exp.startDate} - {exp.endDate || "Present"}
                     </div>
                   </div>
                   {exp.location && (
-                    <div className="text-sm mt-1" style={{ color: "#6B7280" }}>
+                    <div className="text-sm mt-1" style={{ color: "#64748b" }}>
                       {exp.location}
                     </div>
                   )}
                   {exp.description && (
                     <p
                       className="mt-2 whitespace-pre-line"
-                      style={{ color: "#4B5563" }}
+                      style={{ color: "#334155" }}
                     >
                       {exp.description}
                     </p>
@@ -191,7 +202,7 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                   {exp.achievements && exp.achievements.length > 0 && (
                     <ul className="list-disc list-inside mt-2 space-y-1">
                       {exp.achievements.map((achievement, index) => (
-                        <li key={index} style={{ color: "#4B5563" }}>
+                        <li key={index} style={{ color: "#334155" }}>
                           {achievement}
                         </li>
                       ))}
@@ -204,7 +215,7 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                           key={index}
                           className="text-sm px-2 py-1 rounded"
                           style={{
-                            backgroundColor: `${style.primaryColor}15`,
+                            backgroundColor: style.primaryColor + "15",
                             color: style.primaryColor,
                           }}
                         >
@@ -226,7 +237,7 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               className="text-2xl font-semibold mb-4 pb-2 border-b-2"
               style={{
                 color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
+                borderColor: style.primaryColor + "33",
               }}
             >
               Education
@@ -235,17 +246,17 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               {data.education.map((edu) => (
                 <div
                   key={edu.id}
-                  className="p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="p-4 rounded-lg transition-colors border-l-4 bg-white"
                   style={{
-                    borderLeft: `3px solid ${style.primaryColor}`,
-                    backgroundColor: "white",
+                    borderLeftColor: style.primaryColor,
+                    boxShadow: "0 1px 4px #e2e8f0",
                   }}
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <h3
                         className="text-lg font-semibold"
-                        style={{ color: "#374151" }}
+                        style={{ color: "#0f172a" }}
                       >
                         {edu.school}
                       </h3>
@@ -254,27 +265,27 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                       </h4>
                     </div>
                     <div
-                      style={{ color: "#6B7280" }}
                       className="text-sm whitespace-nowrap"
+                      style={{ color: "#64748b" }}
                     >
                       {edu.startDate} - {edu.endDate || "Present"}
                     </div>
                   </div>
                   {edu.location && (
-                    <div className="text-sm mt-1" style={{ color: "#6B7280" }}>
+                    <div className="text-sm mt-1" style={{ color: "#64748b" }}>
                       {edu.location}
                     </div>
                   )}
                   {edu.description && (
                     <p
                       className="mt-2 whitespace-pre-line"
-                      style={{ color: "#4B5563" }}
+                      style={{ color: "#334155" }}
                     >
                       {edu.description}
                     </p>
                   )}
                   {edu.gpa && (
-                    <div className="mt-2 text-sm" style={{ color: "#6B7280" }}>
+                    <div className="mt-2 text-sm" style={{ color: "#64748b" }}>
                       GPA: {edu.gpa}
                     </div>
                   )}
@@ -291,7 +302,7 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               className="text-2xl font-semibold mb-4 pb-2 border-b-2"
               style={{
                 color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
+                borderColor: style.primaryColor + "33",
               }}
             >
               Skills
@@ -302,7 +313,7 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                   <div key={category}>
                     <h3
                       className="text-lg font-medium mb-3"
-                      style={{ color: "#374151" }}
+                      style={{ color: "#0f172a" }}
                     >
                       {category}
                     </h3>
@@ -310,10 +321,13 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                       {skills.map((skill) => (
                         <span
                           key={skill.id}
-                          className="px-3 py-1 rounded-full text-sm"
+                          className={`px-3 py-1 rounded-full text-sm`}
                           style={{
-                            backgroundColor: `${style.primaryColor}15`,
-                            color: style.primaryColor,
+                            backgroundColor: style.primaryColor + "15",
+                            color:
+                              skill.color && skill.color !== "inherit"
+                                ? skill.color
+                                : style.primaryColor,
                             fontStyle: skill.fontStyle,
                             fontWeight: skill.fontWeight,
                             textDecoration: skill.textDecoration,
@@ -333,12 +347,11 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
         {/* Projects Section */}
         {data.projects && data.projects.length > 0 && (
           <section>
-            {" "}
             <h2
               className="text-2xl font-semibold mb-4 pb-2 border-b-2"
               style={{
                 color: style.primaryColor,
-                borderColor: `${style.primaryColor}20`,
+                borderColor: style.primaryColor + "33",
               }}
             >
               Projects
@@ -350,13 +363,20 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                   className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold text-gray-800">
+                    <h3
+                      className="text-lg font-semibold"
+                      style={{ color: "#0f172a" }}
+                    >
                       {project.link ? (
                         <a
                           href={project.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700"
+                          style={{
+                            color: style.primaryColor,
+                            textDecoration: "underline",
+                          }}
+                          className="hover:text-blue-700"
                         >
                           {project.name}
                         </a>
@@ -365,14 +385,20 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                       )}
                     </h3>
                     {(project.startDate || project.endDate) && (
-                      <div className="text-gray-500 text-sm whitespace-nowrap">
+                      <div
+                        className="text-sm whitespace-nowrap"
+                        style={{ color: "#64748b" }}
+                      >
                         {project.startDate && project.startDate}
                         {project.endDate && ` - ${project.endDate}`}
                       </div>
                     )}
                   </div>
                   {project.description && (
-                    <p className="mt-2 text-gray-700 whitespace-pre-line">
+                    <p
+                      className="mt-2 whitespace-pre-line"
+                      style={{ color: "#334155" }}
+                    >
                       {project.description}
                     </p>
                   )}
@@ -381,7 +407,11 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
                       {project.technologies.map((tech, index) => (
                         <span
                           key={index}
-                          className="text-sm bg-blue-50 text-blue-600 px-2 py-1 rounded"
+                          className="text-sm px-2 py-1 rounded"
+                          style={{
+                            backgroundColor: style.primaryColor + "15",
+                            color: style.primaryColor,
+                          }}
                         >
                           {tech}
                         </span>

@@ -74,8 +74,8 @@ const PopularTemplates = () => (
       {[
         { name: "Modern Professional", downloads: "2.3k", rating: 4.8 },
         { name: "Creative Designer", downloads: "1.8k", rating: 4.7 },
+        { name: "Compact Professional", downloads: "1.4k", rating: 4.6 },
         { name: "Clean Minimal", downloads: "1.5k", rating: 4.6 },
-        { name: "Executive Classic", downloads: "1.2k", rating: 4.5 },
       ].map((template, index) => (
         <div
           key={index}

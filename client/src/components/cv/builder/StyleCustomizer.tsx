@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Select } from "@/components/common/Select";
 import { useCV } from "@/context/CVContext";
 import {
@@ -12,7 +12,13 @@ import { CVStyle } from "@/types/cv";
 
 export const StyleCustomizer = () => {
   const { cv, updateCV } = useCV();
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpenRef = useRef(false);
+  const [, forceUpdate] = useState({});
+
+  const setIsOpen = (open: boolean) => {
+    isOpenRef.current = open;
+    forceUpdate({});
+  };
 
   const handleStyleChange = (field: keyof CVStyle, value: string) => {
     updateCV("style", {
@@ -28,13 +34,13 @@ export const StyleCustomizer = () => {
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen(!isOpenRef.current)}
         className="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
       >
         <span>Customize Style</span>
         <svg
           className={`w-5 h-5 transition-transform ${
-            isOpen ? "transform rotate-180" : ""
+            isOpenRef.current ? "transform rotate-180" : ""
           }`}
           fill="none"
           viewBox="0 0 24 24"
@@ -49,9 +55,8 @@ export const StyleCustomizer = () => {
         </svg>
       </button>
 
-      {isOpen && (
+      {isOpenRef.current && (
         <div className="mt-4 space-y-4">
-          {" "}
           <Select
             label="Primary Color"
             value={cv?.style?.primaryColor || PRIMARY_COLORS[0].value}

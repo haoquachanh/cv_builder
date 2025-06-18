@@ -71,30 +71,56 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(getInitialAuthData().user);
+  const [isClient, setIsClient] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Mark when we're on client-side
   useEffect(() => {
-    // Check for existing auth data on mount
-    const { user, token } = getInitialAuthData();
-    if (user && token) {
-      setUser(user);
-    }
-    setIsLoading(false);
+    setIsClient(true);
   }, []);
 
+  // Load auth data only after component has hydrated
+  useEffect(() => {
+    if (isClient) {
+      const { user, token } = getInitialAuthData();
+      if (user && token) {
+        setUser(user);
+      }
+      setIsLoading(false);
+    }
+  }, [isClient]);
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // TODO: Replace with actual API call
+
+      // For local development, simulate a network request
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log(
+        `Login attempt: Email=${email}, Password length=${password.length}`
+      );
+
+      // In a real app, you would validate credentials against a backend
+      // For local development, accept any credentials with minimum validation
+      if (!email || !password) {
+        throw new Error("Email and password are required");
+      }
+
+      if (password.length < 6) {
+        throw new Error("Invalid credentials");
+      }
+
+      // Create a mock user with the email (could also check localStorage for existing users)
       const mockUser: User = {
-        id: "1",
+        id: "user_" + Date.now().toString(),
         email,
-        fullName: "Test User",
+        fullName: email.split("@")[0], // Simple name from email for demo
         role: "user",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+
       const mockToken = "mock_token_" + Date.now();
 
       setUser(mockUser);
@@ -107,13 +133,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   };
-
   const register = async (email: string, password: string, name: string) => {
     try {
       setIsLoading(true);
-      // TODO: Replace with actual API call
+      // For local development, simulate a network request
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log(
+        `Registration: Email=${email}, Name=${name}, Password length=${password.length}`
+      );
+
+      // Create a mock user for local development
       const mockUser: User = {
-        id: "1",
+        id: "user_" + Date.now().toString(),
         email,
         fullName: name,
         role: "user",
@@ -122,8 +154,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       const mockToken = "mock_token_" + Date.now();
 
+      // Store the user data
       setUser(mockUser);
       saveAuthData({ user: mockUser, token: mockToken });
+
+      // Redirect to dashboard
       router.push("/dashboard");
     } catch (error) {
       console.error("Registration error:", error);

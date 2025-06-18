@@ -15,6 +15,7 @@ import { Skill as SkillType } from "@/types/cv";
 import { useState, useMemo } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { generateId } from "@/lib/utils/id";
+import { Button } from "@/components/common/Button";
 
 export const Skills = () => {
   const { cv, updateCV } = useCV();
@@ -105,13 +106,14 @@ export const Skills = () => {
           }}
         />
       </div>
-      <button
+      <Button
         onClick={handleAddCategory}
         disabled={!newCategory.trim()}
-        className="px-4 py-2 h-10 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="primary"
+        className="h-10 flex items-center gap-2"
       >
         <FaPlus size={12} /> Add Category
-      </button>
+      </Button>
     </div>
   );
 
@@ -140,12 +142,13 @@ export const Skills = () => {
                 <h3 className="text-lg font-semibold text-gray-700">
                   {category}
                 </h3>
-                <button
+                <Button
                   onClick={() => handleAddSkill(category)}
-                  className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
+                  variant="outline"
+                  className="text-sm flex items-center gap-1"
                 >
                   <FaPlus size={12} /> Add Skill
-                </button>
+                </Button>
               </div>
 
               {/* Skills in this category */}
@@ -231,13 +234,14 @@ export const Skills = () => {
 
                       {/* Right column - Delete button */}
                       <div className="lg:col-span-1 flex lg:justify-end">
-                        <button
+                        <Button
                           onClick={() => handleDeleteSkill(skill.id)}
-                          className="inline-flex items-center justify-center text-red-500 hover:text-red-700 transition-colors p-2 rounded-full hover:bg-red-50"
+                          variant="outline"
+                          className="text-red-500 hover:text-red-700 transition-colors p-2 rounded-full hover:bg-red-50"
                           title="Delete skill"
                         >
                           <FaTrash />
-                        </button>
+                        </Button>
                       </div>
                     </div>
 

@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -59,7 +58,7 @@ const validationSchema = [
 ];
 
 export function RegisterForm() {
-  const router = useRouter();
+  // Router is used in AuthContext after registration
   const { register } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
@@ -75,20 +74,46 @@ export function RegisterForm() {
     confirmPassword: "",
     agreeToTerms: false,
   };
-
   const handleSubmit = async (values: RegisterFormValues) => {
-    if (currentStep === 0) {
-      setSavedValues({ ...savedValues, email: values.email });
-      setCurrentStep(1);
-      return;
-    }
-
     try {
+      // Clear any previous errors
       setError("");
-      const email = savedValues.email || values.email;
-      await register(email, values.password, values.name);
-      router.push("/dashboard");
+
+      if (currentStep === 0) {
+        // First step - validate email and move to next step
+        console.log("Step 1 completed, email validated:", values.email);
+        setSavedValues({ ...savedValues, email: values.email });
+        setCurrentStep(1);
+        return;
+      } else {
+        // Second step - submit the full registration
+        console.log("Attempting to register with:", {
+          email: savedValues.email || values.email,
+          name: values.name,
+          passwordLength: values.password.length,
+        });
+
+        // Make sure we have the email from step 1
+        const email = savedValues.email || values.email;
+
+        // Validate that all required fields are present
+        if (
+          !email ||
+          !values.password ||
+          !values.name ||
+          !values.agreeToTerms
+        ) {
+          setError("Please fill in all required fields and accept the terms");
+          return;
+        }
+
+        // Submit registration
+        await register(email, values.password, values.name);
+
+        // The redirect is handled in the register function
+      }
     } catch (err) {
+      console.error("Registration error:", err);
       setError(
         err instanceof Error
           ? err.message
@@ -141,12 +166,13 @@ export function RegisterForm() {
                     type="email"
                     placeholder="Email address"
                     icon={<FaEnvelope className="text-gray-400" />}
+                    formik={true}
                   />
                 </div>
-
                 <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  disabled={isSubmitting}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 relative z-10"
                 >
                   {isSubmitting ? (
                     <LoadingSpinner size="sm" />
@@ -166,6 +192,7 @@ export function RegisterForm() {
                     type="text"
                     placeholder="Full name"
                     icon={<FaUser className="text-gray-400" />}
+                    formik={true}
                   />
                 </div>
 
@@ -176,6 +203,7 @@ export function RegisterForm() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Create password"
                       icon={<FaLock className="text-gray-400" />}
+                      formik={true}
                       rightIcon={
                         <button
                           type="button"
@@ -216,14 +244,16 @@ export function RegisterForm() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Confirm password"
                     icon={<FaLock className="text-gray-400" />}
+                    formik={true}
                   />
                 </div>
 
                 <label className="flex items-center text-gray-700 text-sm gap-2">
-                  <input
+                  <Input
                     type="checkbox"
                     name="agreeToTerms"
                     className="rounded text-blue-600 focus:ring-blue-500"
+                    formik={true}
                   />
                   I agree to the{" "}
                   <Link
@@ -245,7 +275,8 @@ export function RegisterForm() {
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 relative z-10"
                   >
                     {isSubmitting ? (
                       <LoadingSpinner size="sm" />

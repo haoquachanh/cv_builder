@@ -9,16 +9,21 @@ import {
   useRef,
   useEffect,
 } from "react";
-export type TemplateType = "modern" | "classic" | "minimal";
+import { downloadPDF } from "@/lib/downloadPDF";
 
-// Import html2pdf dynamically only on client side
-let html2pdf: typeof import("html2pdf.js");
+export type TemplateType =
+  | "modern"
+  | "classic"
+  | "minimal"
+  | "compact"
+  | "creative";
 
 interface CVContextType {
   cv: CV;
   updateCV: <K extends keyof CV>(key: K, value: CV[K]) => void;
   saveCv: () => Promise<void>;
   exportPDF: () => Promise<void>;
+  isExporting: boolean;
   previewRef: React.RefObject<HTMLDivElement | null>;
   selectedTemplate: TemplateType;
   setSelectedTemplate: (template: TemplateType) => void;
@@ -44,59 +49,37 @@ interface StoredData {
   selectedTemplate: TemplateType;
 }
 
-// Helper function to get initial data
-const getInitialData = (): StoredData => {
-  if (typeof window === "undefined") {
-    return {
-      cv: defaultCV,
-      selectedTemplate: "modern",
-    };
-  }
-
-  try {
-    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (storedData) {
-      return JSON.parse(storedData) as StoredData;
-    }
-  } catch (error) {
-    console.error("Error loading CV from localStorage:", error);
-  }
-
-  return {
-    cv: defaultCV,
-    selectedTemplate: "modern",
-  };
-};
-
 export const CVContext = createContext<CVContextType | undefined>(undefined);
 
 export function CVProvider({ children }: { children: ReactNode }) {
-  const initialData = getInitialData();
-  const [cv, setCV] = useState<CV>(initialData.cv);
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>(
-    initialData.selectedTemplate
-  );
+  const [isClient, setIsClient] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [cv, setCV] = useState<CV>(defaultCV);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<TemplateType>("modern");
+  const [isExporting, setIsExporting] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // Auto-save effect
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    setIsClient(true);
+  }, []);
 
-    const saveData = () => {
+  useEffect(() => {
+    if (isClient) {
       try {
-        const dataToStore: StoredData = {
-          cv,
-          selectedTemplate,
-        };
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToStore));
+        const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storedData) {
+          const parsedData = JSON.parse(storedData) as StoredData;
+          setCV(parsedData.cv);
+          setSelectedTemplate(parsedData.selectedTemplate);
+        }
       } catch (error) {
-        console.error("Error auto-saving CV to localStorage:", error);
+        console.error("Error loading CV from localStorage:", error);
+      } finally {
+        setIsLoaded(true);
       }
-    };
-
-    // Save whenever cv or template changes
-    saveData();
-  }, [cv, selectedTemplate]);
+    }
+  }, [isClient]);
 
   const updateCV = <K extends keyof CV>(key: K, value: CV[K]) => {
     setCV((prev) => ({
@@ -117,8 +100,7 @@ export function CVProvider({ children }: { children: ReactNode }) {
         selectedTemplate,
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToStore));
-      // Display save confirmation
-      alert("CV saved successfully!");
+      alert("CV saved in Local Storage successfully!");
     } catch (error) {
       console.error("Error saving CV to localStorage:", error);
       alert("Error saving CV. Please try again.");
@@ -129,41 +111,37 @@ export function CVProvider({ children }: { children: ReactNode }) {
       console.error("Cannot export PDF during server-side rendering");
       return;
     }
-
-    if (!previewRef.current) {
-      console.error("Preview reference not found");
-      return;
-    }
-
+    setIsExporting(true);
+    const notification = document.createElement("div");
+    notification.style.position = "fixed";
+    notification.style.bottom = "20px";
+    notification.style.right = "20px";
+    notification.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+    notification.style.color = "white";
+    notification.style.padding = "10px 15px";
+    notification.style.borderRadius = "4px";
+    notification.style.zIndex = "9999";
+    notification.textContent = "Preparing PDF export...";
+    document.body.appendChild(notification);
     try {
-      // Dynamically import html2pdf only on client side
-      if (!html2pdf) {
-        const importedModule = await import("html2pdf.js");
-        html2pdf = importedModule.default;
-      }
-
-      const element = previewRef.current;
-      const opt = {
-        margin: 0.5,
-        filename: `${cv?.personalInfo?.fullName || "CV"}-${
-          new Date().toISOString().split("T")[0]
-        }.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-        },
-        jsPDF: {
-          unit: "in",
-          format: "a4",
-          orientation: "portrait",
-        },
-      };
-
-      await html2pdf().set(opt).from(element).save();
+      const name =
+        cv.personalInfo?.fullName?.replace(/[^a-z0-9]/gi, "-") || "CV";
+      notification.textContent = "Generating PDF...";
+      await downloadPDF(name);
+      notification.textContent = "PDF successfully exported!";
+      notification.style.backgroundColor = "rgba(22, 163, 74, 0.9)";
     } catch (error) {
       console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+      notification.textContent = "PDF export failed";
+      notification.style.backgroundColor = "rgba(220, 38, 38, 0.9)";
+    } finally {
+      setIsExporting(false);
+      setTimeout(() => {
+        if (notification && notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3000);
     }
   };
 
@@ -174,12 +152,13 @@ export function CVProvider({ children }: { children: ReactNode }) {
         updateCV,
         saveCv,
         exportPDF,
+        isExporting,
         previewRef,
         selectedTemplate,
         setSelectedTemplate,
       }}
     >
-      {children}
+      {isLoaded ? <div key={JSON.stringify(cv)}>{children}</div> : null}
     </CVContext.Provider>
   );
 }

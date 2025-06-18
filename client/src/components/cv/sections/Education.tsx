@@ -17,6 +17,7 @@ import {
   FaMapMarkerAlt,
   FaStar,
 } from "react-icons/fa";
+import { Button } from "@/components/common/Button";
 
 export const Education = () => {
   const { cv, updateCV } = useCV();
@@ -58,12 +59,13 @@ export const Education = () => {
   };
 
   const addButton = (
-    <button
+    <Button
       onClick={handleAddEducation}
-      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+      variant="primary"
+      className="flex items-center gap-2 px-4 py-2 text-sm"
     >
       <FaPlus className="text-white" /> Add Education
-    </button>
+    </Button>
   );
 
   return (
@@ -89,13 +91,14 @@ export const Education = () => {
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 Education #{idx + 1}
               </h3>
-              <button
+              <Button
                 onClick={() => handleDeleteEducation(idx)}
-                className="text-red-500 hover:text-red-700 transition-colors p-1"
+                variant="outline"
+                className="text-red-500 hover:text-red-700 transition-colors p-1 border-none"
                 title="Delete education"
               >
                 <FaTrash />
-              </button>
+              </Button>
             </div>
 
             {/* School Information */}

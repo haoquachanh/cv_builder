@@ -1,8 +1,10 @@
 "use client";
 
-import { FaFileAlt, FaDownload, FaEye, FaStar } from "react-icons/fa";
+import React from "react";
+import { FaFileAlt, FaDownload, FaEye, FaStar, FaUsers } from "react-icons/fa";
 import Link from "next/link";
 import { IconType } from "react-icons";
+import { useAuth } from "@/context/AuthContext";
 
 const StatCard = ({
   icon: Icon,
@@ -99,7 +101,7 @@ const PopularTemplates = () => (
 );
 
 const QuickActions = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
     {[
       {
         title: "Create New CV",
@@ -111,21 +113,28 @@ const QuickActions = () => (
       {
         title: "Browse Templates",
         description: "Find the perfect template",
-        href: "/dashboard/templates",
+        href: "/admin/dashboard/templates",
         icon: FaDownload,
         color: "bg-purple-600 hover:bg-purple-700",
       },
       {
         title: "View My CVs",
         description: "Manage your CVs",
-        href: "/dashboard/my-cvs",
+        href: "/admin/dashboard/my-cvs",
         icon: FaEye,
         color: "bg-green-600 hover:bg-green-700",
       },
       {
+        title: "Manage Users",
+        description: "Add or edit users",
+        href: "/admin/dashboard/users",
+        icon: FaUsers,
+        color: "bg-teal-600 hover:bg-teal-700",
+      },
+      {
         title: "Update Profile",
         description: "Edit your information",
-        href: "/dashboard/profile",
+        href: "/admin/dashboard/profile",
         icon: FaStar,
         color: "bg-orange-600 hover:bg-orange-700",
       },
@@ -143,7 +152,9 @@ const QuickActions = () => (
   </div>
 );
 
-export default function DashboardPage() {
+export default function AdminDashboard() {
+  const { user } = useAuth();
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

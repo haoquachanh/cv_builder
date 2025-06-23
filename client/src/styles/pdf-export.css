@@ -1,0 +1,38 @@
+/* Special PDF export styles */
+.pdf-export {
+  padding: 0 !important;
+  background-color: white !important;
+}
+
+.pdf-export .container {
+  padding: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Remove shadows and borders in PDF */
+.pdf-export .cv-page {
+  box-shadow: none !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Hide toolbar and scrollbars */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .toolbar, 
+  .navbar,
+  .footer {
+    display: none !important;
+  }
+  
+  /* Set page size to A4 */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}

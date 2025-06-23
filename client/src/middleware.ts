@@ -33,5 +33,7 @@ export const config = {
     "/reset-password",
     "/dashboard/:path*",
     "/builder/:path*",
+    // Exclude the homepage to prevent any unwanted redirects
+    "/((?!$).)*",
   ],
 };

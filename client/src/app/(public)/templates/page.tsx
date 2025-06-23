@@ -98,17 +98,11 @@ export default function TemplatesPage() {
                     {template.rating}
                   </span>
                 </div>
-              </div>
 
-              <button
-                className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                onClick={() =>
-                  (window.location.href = `/builder?template=${template.id}`)
-                }
-              >
-                <FaDownload className="w-4 h-4 mr-2" />
-                Use Template
-              </button>
+                <button className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                  Use Template
+                </button>
+              </div>
             </div>
           </div>
         ))}

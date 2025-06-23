@@ -1,4 +1,4 @@
-// src/app/dashboard/settings/page.tsx
+// src/app/admin/dashboard/settings/page.tsx
 "use client";
 
 import { Button } from "@/components/common/Button";

@@ -1,0 +1,56 @@
+/* Button tooltips */
+button[disabled]:hover [data-tooltip] {
+  visibility: visible;
+  opacity: 1;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Animation for button pressing */
+button:active:not([disabled]) {
+  transform: scale(0.98);
+}
+
+/* Transition for hover effects */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Better focus styles for accessibility */
+button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Button icon styling */
+.button-icon-left {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-icon-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure icons are properly aligned */
+button svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Handle overflow for buttons with long text */
+button > div {
+  width: 100%;
+}
+
+/* Prevent wrapping in small buttons */
+.text-xs button > div,
+.text-sm button > div {
+  white-space: nowrap;
+}

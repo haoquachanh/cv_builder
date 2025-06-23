@@ -50,8 +50,8 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
           style.backgroundPattern !== "none"
             ? style.backgroundPattern
             : undefined,
-        backgroundSize:
-          style.backgroundPattern !== "none" ? "24px 24px" : undefined,
+        backgroundSize: style.backgroundPattern !== "none" ? "auto" : undefined,
+        backgroundRepeat: "repeat",
       }}
     >
       {/* Header Section */}
@@ -308,34 +308,44 @@ export const ModernTemplate: React.FC<{ data: CV }> = ({ data }) => {
               Skills
             </h2>
             <div className="space-y-6">
+              {" "}
               {Array.from(skillsByCategory.entries()).map(
                 ([category, skills]) => (
                   <div key={category}>
                     <h3
-                      className="text-lg font-medium mb-3"
+                      className="text-lg font-medium mb-3 flex items-center"
                       style={{ color: "#0f172a" }}
                     >
+                      <span
+                        className="inline-block mr-2 w-2 h-2 rounded-full"
+                        style={{ backgroundColor: style.primaryColor }}
+                      ></span>
                       {category}
                     </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {skills.map((skill) => (
-                        <span
-                          key={skill.id}
-                          className={`px-3 py-1 rounded-full text-sm`}
-                          style={{
-                            backgroundColor: style.primaryColor + "15",
-                            color:
-                              skill.color && skill.color !== "inherit"
-                                ? skill.color
-                                : style.primaryColor,
-                            fontStyle: skill.fontStyle,
-                            fontWeight: skill.fontWeight,
-                            textDecoration: skill.textDecoration,
-                          }}
-                        >
-                          {skill.name}
-                        </span>
-                      ))}
+                    <div className="flex flex-wrap gap-2.5 mb-4">
+                      {skills.map((skill) => {
+                        const skillColor =
+                          skill.color && skill.color !== "inherit"
+                            ? skill.color
+                            : style.primaryColor;
+
+                        return (
+                          <span
+                            key={skill.id}
+                            className={`px-3 py-1.5 rounded-full text-sm shadow-sm transition-all`}
+                            style={{
+                              backgroundColor: `${skillColor}15`,
+                              color: skillColor,
+                              fontStyle: skill.fontStyle,
+                              fontWeight: skill.fontWeight,
+                              textDecoration: skill.textDecoration,
+                              border: `1px solid ${skillColor}25`,
+                            }}
+                          >
+                            {skill.name}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 )

@@ -87,7 +87,6 @@ export function CVProvider({ children }: { children: ReactNode }) {
       [key]: value,
     }));
   };
-
   const saveCv = async () => {
     if (typeof window === "undefined") {
       console.error("Cannot save CV during server-side rendering");
@@ -95,12 +94,18 @@ export function CVProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const dataToStore: StoredData = {
-        cv,
-        selectedTemplate,
-      };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToStore));
-      alert("CV saved in Local Storage successfully!");
+      // Phát ra sự kiện để các component khác có thể lắng nghe và cập nhật dữ liệu
+      window.dispatchEvent(new Event("cv-save"));
+
+      // Lưu vào localStorage sau khi các component đã cập nhật dữ liệu
+      setTimeout(() => {
+        const dataToStore: StoredData = {
+          cv,
+          selectedTemplate,
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToStore));
+        alert("CV saved in Local Storage successfully!");
+      }, 100);
     } catch (error) {
       console.error("Error saving CV to localStorage:", error);
       alert("Error saving CV. Please try again.");
@@ -111,37 +116,16 @@ export function CVProvider({ children }: { children: ReactNode }) {
       console.error("Cannot export PDF during server-side rendering");
       return;
     }
-    setIsExporting(true);
-    const notification = document.createElement("div");
-    notification.style.position = "fixed";
-    notification.style.bottom = "20px";
-    notification.style.right = "20px";
-    notification.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-    notification.style.color = "white";
-    notification.style.padding = "10px 15px";
-    notification.style.borderRadius = "4px";
-    notification.style.zIndex = "9999";
-    notification.textContent = "Preparing PDF export...";
-    document.body.appendChild(notification);
+
     try {
+      setIsExporting(true);
       const name =
         cv.personalInfo?.fullName?.replace(/[^a-z0-9]/gi, "-") || "CV";
-      notification.textContent = "Generating PDF...";
       await downloadPDF(name);
-      notification.textContent = "PDF successfully exported!";
-      notification.style.backgroundColor = "rgba(22, 163, 74, 0.9)";
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Error generating PDF. Please try again.");
-      notification.textContent = "PDF export failed";
-      notification.style.backgroundColor = "rgba(220, 38, 38, 0.9)";
     } finally {
       setIsExporting(false);
-      setTimeout(() => {
-        if (notification && notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 3000);
     }
   };
 
@@ -158,7 +142,7 @@ export function CVProvider({ children }: { children: ReactNode }) {
         setSelectedTemplate,
       }}
     >
-      {isLoaded ? <div key={JSON.stringify(cv)}>{children}</div> : null}
+      {isLoaded ? <div>{children}</div> : null}
     </CVContext.Provider>
   );
 }

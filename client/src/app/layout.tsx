@@ -1,16 +1,13 @@
-// src/app/layout.tsx
+import "@/styles/globals.css";
 import type { Metadata } from "next";
-import "./globals.css";
-
-import Navbar from "@/components/layout/NavBar";
-import { Footer } from "@/components/layout/Footer";
-import { AuthProvider } from "@/context/AuthContext";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "CV Builder",
   description: "Build your CV easily and professionally",
 };
 
+// Root layout - all pages are wrapped in this layout
 export default function RootLayout({
   children,
 }: {
@@ -18,12 +15,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white min-h-screen flex flex-col">
-        <AuthProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </AuthProvider>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

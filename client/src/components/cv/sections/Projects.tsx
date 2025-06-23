@@ -1,41 +1,216 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Project } from "@/types/cv";
 import { useCV } from "@/context/CVContext";
 import { Input } from "@/components/common/Input";
 import { Button } from "@/components/common/Button";
-import {
-  FaTrash,
-  FaCalendar,
-  FaLink,
-  FaTags,
-  FaInfoCircle,
-  FaPlus,
-} from "react-icons/fa";
+import { FaTrash, FaCalendar, FaLink, FaTags, FaPlus } from "react-icons/fa";
+import { SectionHeader } from "../shared/SectionHeader";
 
-export const Projects = () => {
+// Create a memoized ProjectItem component to avoid unnecessary re-renders
+const ProjectItem = React.memo(
+  ({
+    project,
+    index,
+    onUpdate,
+    onDelete,
+    onTechnologiesChange,
+    dateErrors,
+  }: {
+    project: Project;
+    index: number;
+    onUpdate: (
+      index: number,
+      field: keyof Project,
+      value: string | string[]
+    ) => void;
+    onDelete: (index: number) => void;
+    onTechnologiesChange: (index: number, value: string) => void;
+    dateErrors: { [key: string]: string };
+  }) => {
+    return (
+      <div
+        key={project.id}
+        className="p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 
+      dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+      >
+        <div className="flex justify-between items-start mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Project #{index + 1}
+          </h3>
+          <Button
+            onClick={() => onDelete(index)}
+            variant="outline"
+            className="text-red-500 hover:text-red-700 transition-colors p-2 border-none rounded-full"
+            title="Delete project"
+          >
+            <FaTrash />
+          </Button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              name={`project-name-${project.id}`}
+              label="Project Name"
+              placeholder="e.g. E-commerce Website"
+              value={project.name}
+              onChange={(e) => onUpdate(index, "name", e.target.value)}
+              required
+            />
+            <div className="relative">
+              <Input
+                name={`project-url-${project.id}`}
+                label="Project URL"
+                placeholder="https://project-demo.com"
+                value={project.link || ""}
+                onChange={(e) => onUpdate(index, "link", e.target.value)}
+                icon={<FaLink className="text-gray-400" />}
+              />
+            </div>
+          </div>
+          {/* Timeline */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="relative">
+              <Input
+                name={`project-start-${project.id}`}
+                label="Start Date"
+                type="date"
+                value={project.startDate || ""}
+                onChange={(e) => onUpdate(index, "startDate", e.target.value)}
+                icon={<FaCalendar className="text-gray-400" />}
+                required
+              />
+            </div>
+            <div className="relative">
+              <Input
+                name={`project-end-${project.id}`}
+                label="End Date"
+                type="date"
+                value={project.endDate || ""}
+                onChange={(e) => onUpdate(index, "endDate", e.target.value)}
+                icon={<FaCalendar className="text-gray-400" />}
+              />
+              {dateErrors[project.id] && (
+                <p className="text-red-500 text-xs mt-1">
+                  {dateErrors[project.id]}
+                </p>
+              )}
+            </div>
+          </div>{" "}
+          {/* Project Description section removed */}
+          {/* Technologies */}
+          <div className="relative">
+            {" "}
+            <label className="flex text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 items-center gap-2">
+              <FaTags className="text-gray-400" />
+              Technologies Used
+            </label>
+            <textarea
+              name={`project-tech-${project.id}`}
+              placeholder="React, TypeScript, Node.js, AWS..."
+              value={(project.technologies || []).join(", ")}
+              onChange={(e) => onTechnologiesChange(index, e.target.value)}
+              className="w-full px-3 py-2 bg-white dark:bg-gray-900
+              border border-gray-300 dark:border-gray-700 rounded-lg
+              shadow-sm outline-none transition-all duration-200
+              placeholder:text-gray-400 dark:placeholder:text-gray-500
+              hover:border-gray-400 dark:hover:border-gray-600
+              focus:border-primary-500 focus:ring-1 focus:ring-primary-500
+              dark:focus:border-primary-500 dark:focus:ring-primary-500/20
+              min-h-[60px] resize-y"
+            />
+            <p className="mt-1.5 text-sm text-gray-500">
+              List technologies used, separated by commas
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+ProjectItem.displayName = "ProjectItem";
+
+// Using React.memo to prevent unnecessary renders
+export const Projects = React.memo(() => {
   const { cv, updateCV } = useCV();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [dateErrors, setDateErrors] = useState<{ [key: string]: string }>({});
+  // Local state for projects
+  const [localProjects, setLocalProjects] = useState<Project[]>([]); // One-time initialization from context
+  const didInitialize = useRef(false);
 
+  // Initialize local state from context only once at component mount
+  useEffect(() => {
+    if (!didInitialize.current && cv?.projects) {
+      setLocalProjects(cv.projects);
+      didInitialize.current = true;
+    }
+  }, [cv?.projects]); // Include cv.projects in dependencies to satisfy linter
+
+  // Use debounce to prevent update loops
+  const updateTimeout = useRef<NodeJS.Timeout | null>(null);
+  // Update context with debouncing to prevent infinite loops
+  useEffect(() => {
+    // Skip the initial render
+    if (!didInitialize.current) return;
+
+    // Clear any existing timeout
+    if (updateTimeout.current) {
+      clearTimeout(updateTimeout.current);
+    } // Schedule update after a delay
+    updateTimeout.current = setTimeout(() => {
+      updateCV("projects", localProjects);
+    }, 300); // 300ms debounce - reduced for more responsive preview updates
+
+    // Cleanup
+    return () => {
+      if (updateTimeout.current) {
+        clearTimeout(updateTimeout.current);
+      }
+    };
+  }, [localProjects, updateCV]);
+
+  // When user clicks Save in toolbar, sync data to context for localStorage
+  useEffect(() => {
+    const handleSave = () => {
+      // No need to update CV here as it's already in sync through the effect above
+      // The event is just a trigger for CVContext to save to localStorage
+    };
+
+    // Listen for save event
+    window.addEventListener("cv-save", handleSave);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("cv-save", handleSave);
+    };
+  }, []);
   const handleAddProject = () => {
+    // Generate a unique ID with timestamp to guarantee uniqueness
+    const uniqueId = `proj_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
     const newProject: Project = {
-      id: Date.now().toString(),
+      id: uniqueId,
       name: "",
-      description: "",
       link: "",
       startDate: "",
       endDate: "",
       technologies: [],
     };
-    updateCV("projects", [...(cv?.projects || []), newProject]);
+    // Update only local state - the useEffect will handle updating CVContext
+    setLocalProjects((prev) => [...prev, newProject]);
+
     setIsCollapsed(false);
   };
 
   const handleDeleteProject = (index: number) => {
-    const updatedProjects = cv?.projects?.filter((_, idx) => idx !== index);
-    updateCV("projects", updatedProjects || []);
+    // Update only local state - the useEffect will handle updating CVContext
+    setLocalProjects((prev) => prev.filter((_, idx) => idx !== index));
   };
 
   const validateDates = (
@@ -65,15 +240,12 @@ export const Projects = () => {
     });
     return true;
   };
-
   const handleUpdateProject = (
     index: number,
     field: keyof Project,
     value: string | string[]
   ) => {
-    if (!cv?.projects) return;
-
-    const project = cv.projects[index];
+    const project = localProjects[index];
 
     if (
       (field === "startDate" || field === "endDate") &&
@@ -87,13 +259,15 @@ export const Projects = () => {
         return;
       }
     }
-
-    const updatedProjects = [...cv.projects];
-    updatedProjects[index] = {
-      ...updatedProjects[index],
-      [field]: value,
-    };
-    updateCV("projects", updatedProjects);
+    // Update only local state - the useEffect will handle updating CVContext
+    setLocalProjects((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return updated;
+    });
   };
 
   const handleTechnologiesChange = (index: number, value: string) => {
@@ -114,169 +288,42 @@ export const Projects = () => {
     </Button>
   );
 
-  if (isCollapsed && (!cv?.projects || cv.projects.length === 0)) {
-    return addButton;
-  }
-
   return (
-    <div className="space-y-6">
-      {!isCollapsed &&
-        (cv?.projects || []).map((project, idx) => (
-          <div
+    <section className="space-y-6">
+      <SectionHeader
+        title="Projects"
+        isCollapsed={isCollapsed}
+        onToggle={() => setIsCollapsed(!isCollapsed)}
+        actionButton={addButton}
+      />
+      <div
+        className={`space-y-6 transition-all duration-300 ease-in-out ${
+          isCollapsed ? "hidden" : ""
+        }`}
+      >
+        {localProjects.map((project, idx) => (
+          <ProjectItem
             key={project.id}
-            className="p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 
-            dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
-          >
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Project #{idx + 1}
-              </h3>
-              <Button
-                onClick={() => handleDeleteProject(idx)}
-                variant="outline"
-                className="text-red-500 hover:text-red-700 transition-colors p-2 border-none rounded-full"
-                title="Delete project"
-              >
-                <FaTrash />
-              </Button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Basic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
-                  name={`project-name-${project.id}`}
-                  label="Project Name"
-                  placeholder="e.g. E-commerce Website"
-                  value={project.name}
-                  onChange={(e) =>
-                    handleUpdateProject(idx, "name", e.target.value)
-                  }
-                  required
-                />
-                <div className="relative">
-                  <Input
-                    name={`project-url-${project.id}`}
-                    label="Project URL"
-                    placeholder="https://project-demo.com"
-                    value={project.link || ""}
-                    onChange={(e) =>
-                      handleUpdateProject(idx, "link", e.target.value)
-                    }
-                    icon={<FaLink className="text-gray-400" />}
-                  />
-                </div>
-              </div>
-
-              {/* Timeline */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="relative">
-                  <Input
-                    name={`project-start-${project.id}`}
-                    label="Start Date"
-                    type="date"
-                    value={project.startDate || ""}
-                    onChange={(e) =>
-                      handleUpdateProject(idx, "startDate", e.target.value)
-                    }
-                    icon={<FaCalendar className="text-gray-400" />}
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <Input
-                    name={`project-end-${project.id}`}
-                    label="End Date"
-                    type="date"
-                    value={project.endDate || ""}
-                    onChange={(e) =>
-                      handleUpdateProject(idx, "endDate", e.target.value)
-                    }
-                    icon={<FaCalendar className="text-gray-400" />}
-                    error={dateErrors[project.id]}
-                  />
-                  {!project.endDate && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      Leave empty for ongoing projects
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
-                  <span className="text-red-500 ml-1">*</span>
-                </label>
-                <textarea
-                  placeholder="Describe your project, its goals, and your role..."
-                  value={project.description || ""}
-                  onChange={(e) =>
-                    handleUpdateProject(idx, "description", e.target.value)
-                  }
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-900
-                  border border-gray-300 dark:border-gray-700 rounded-lg
-                  shadow-sm outline-none transition-all duration-200
-                  placeholder:text-gray-400 dark:placeholder:text-gray-500
-                  hover:border-gray-400 dark:hover:border-gray-600
-                  focus:border-primary-500 focus:ring-1 focus:ring-primary-500
-                  dark:focus:border-primary-500 dark:focus:ring-primary-500/20
-                  min-h-[100px] resize-y
-                  disabled:opacity-60 disabled:cursor-not-allowed
-                  aria-invalid:border-red-500 dark:aria-invalid:border-red-500"
-                  required
-                  aria-required="true"
-                />
-              </div>
-
-              {/* Technologies */}
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Technologies Used
-                  <span className="text-gray-500 ml-1 text-xs font-normal">
-                    (recommended)
-                  </span>
-                </label>
-                <div className="relative group">
-                  <textarea
-                    placeholder="React, TypeScript, Node.js, AWS..."
-                    value={(project.technologies || []).join(", ")}
-                    onChange={(e) =>
-                      handleTechnologiesChange(idx, e.target.value)
-                    }
-                    className="w-full pl-9 pr-3 py-2 bg-white dark:bg-gray-900
-                    border border-gray-300 dark:border-gray-700 rounded-lg
-                    shadow-sm outline-none transition-all duration-200
-                    placeholder:text-gray-400 dark:placeholder:text-gray-500
-                    hover:border-gray-400 dark:hover:border-gray-600 
-                    focus:border-primary-500 focus:ring-1 focus:ring-primary-500
-                    dark:focus:border-primary-500 dark:focus:ring-primary-500/20
-                    min-h-[60px] resize-y"
-                    aria-describedby={`tech-tooltip-${project.id}`}
-                  />
-                  <FaTags className="absolute left-3 top-2.5 text-gray-400" />
-                  <div
-                    id={`tech-tooltip-${project.id}`}
-                    role="tooltip"
-                    className="invisible group-hover:visible absolute z-10 px-3 py-2 text-sm
-                    text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100
-                    transition-opacity duration-300 mt-2 w-64 left-0"
-                  >
-                    List the technologies, frameworks, or tools used in this
-                    project. Separate multiple items with commas.
-                  </div>
-                </div>
-                <p className="mt-1 text-sm text-gray-500 flex items-center gap-1">
-                  <FaInfoCircle className="text-gray-400" />
-                  Separate technologies with commas
-                </p>
-              </div>
-            </div>
-          </div>
+            project={project}
+            index={idx}
+            onUpdate={handleUpdateProject}
+            onDelete={handleDeleteProject}
+            onTechnologiesChange={handleTechnologiesChange}
+            dateErrors={dateErrors}
+          />
         ))}
 
-      <div className="flex justify-center">{addButton}</div>
-    </div>
+        {localProjects.length === 0 && (
+          <div className="text-center py-8 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            <p className="text-gray-500 dark:text-gray-400">
+              No projects added yet. Click &quot;Add Project&quot; to get
+              started.
+            </p>
+          </div>
+        )}
+      </div>{" "}
+    </section>
   );
-};
+});
+
+Projects.displayName = "Projects";

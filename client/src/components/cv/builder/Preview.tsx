@@ -1,7 +1,7 @@
 // src/components/cv/builder/Preview.tsx
 "use client";
 
-import { useRef, useState, MouseEvent, forwardRef } from "react";
+import { useRef, useState, MouseEvent, forwardRef, useMemo } from "react";
 import { useCV } from "@/context/CVContext";
 import { getTemplateComponent } from "../templates";
 
@@ -19,6 +19,18 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     const [startY, setStartY] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
     const [scrollTop, setScrollTop] = useState(0);
+    // Using key prop approach to force re-renders when cv changes
+    const forceUpdateKey = useMemo(
+      () =>
+        JSON.stringify({
+          personalInfo: cv?.personalInfo,
+          education: cv?.education?.length,
+          experience: cv?.experience?.length,
+          skills: cv?.skills?.length,
+          projects: cv?.projects?.length,
+        }),
+      [cv]
+    );
 
     const handleMouseDown = (e: MouseEvent) => {
       setIsDragging(true);
@@ -46,7 +58,30 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
       setIsDragging(false);
     };
 
-    const TemplateComponent = getTemplateComponent(selectedTemplate);
+    // Memoize the template component to prevent unnecessary re-renders
+    const TemplateComponent = useMemo(
+      () => getTemplateComponent(selectedTemplate),
+      [selectedTemplate]
+    );
+
+    // Memoize the CV data to use in the template
+    const cvData = useMemo(
+      () =>
+        cv || {
+          personalInfo: {
+            fullName: "",
+            email: "",
+            phone: "",
+            location: "",
+          },
+          education: [],
+          experience: [],
+          skills: [],
+          projects: [],
+        },
+      [cv]
+    );
+
     return (
       <div
         ref={containerRef}
@@ -64,24 +99,9 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             transform: `scale(${zoom})`,
           }}
         >
-          {/* A4 size paper with exact dimensions for accurate PDF export */}
+          {/* A4 size paper with exact dimensions for accurate PDF export */}{" "}
           <div className="w-[210mm] max-w-[210mm] min-w-[210mm] h-[297mm] min-h-[297mm] max-h-[297mm] overflow-hidden print:shadow-none relative cv-export-container">
-            <TemplateComponent
-              data={
-                cv || {
-                  personalInfo: {
-                    fullName: "",
-                    email: "",
-                    phone: "",
-                    location: "",
-                  },
-                  education: [],
-                  experience: [],
-                  skills: [],
-                  projects: [],
-                }
-              }
-            />
+            <TemplateComponent key={forceUpdateKey} data={cvData} />
           </div>
         </div>
       </div>

@@ -8,20 +8,25 @@ import {
   FaHistory,
   FaDownload,
   FaUser,
+  FaUsers,
 } from "react-icons/fa";
 
 export const Sidebar = () => {
   const pathname = usePathname();
 
   const isActivePath = (path: string) => pathname === path;
-
   const menuItems = [
-    { href: "/dashboard", icon: FaChartBar, label: "Overview" },
-    { href: "/dashboard/my-cvs", icon: FaFileAlt, label: "My CVs" },
-    { href: "/dashboard/history", icon: FaHistory, label: "History" },
-    { href: "/dashboard/templates", icon: FaDownload, label: "Templates" },
-    { href: "/dashboard/profile", icon: FaUser, label: "Profile" },
-    { href: "/dashboard/settings", icon: FaCog, label: "Settings" },
+    { href: "/admin/dashboard", icon: FaChartBar, label: "Overview" },
+    { href: "/admin/dashboard/my-cvs", icon: FaFileAlt, label: "My CVs" },
+    { href: "/admin/dashboard/history", icon: FaHistory, label: "History" },
+    {
+      href: "/admin/dashboard/templates",
+      icon: FaDownload,
+      label: "Templates",
+    },
+    { href: "/admin/dashboard/users", icon: FaUsers, label: "Users" },
+    { href: "/admin/dashboard/profile", icon: FaUser, label: "Profile" },
+    { href: "/admin/dashboard/settings", icon: FaCog, label: "Settings" },
   ];
 
   return (

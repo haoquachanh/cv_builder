@@ -3,6 +3,7 @@ export interface PersonalInfo {
   email: string;
   phone: string;
   location: string;
+  dateOfBirth?: string;
   title?: string;
   summary?: string;
   linkedin?: string;
@@ -17,7 +18,6 @@ export interface Education {
   fieldOfStudy: string;
   startDate: string;
   endDate?: string;
-  description?: string;
   location?: string;
   gpa?: string;
 }
@@ -28,7 +28,6 @@ export interface Experience {
   position: string;
   startDate: string;
   endDate?: string;
-  description?: string;
   location?: string;
   achievements?: string[];
   technologies?: string[];
@@ -47,7 +46,6 @@ export interface Skill {
 export interface Project {
   id: string;
   name: string;
-  description?: string;
   link?: string;
   technologies?: string[];
   startDate?: string;

@@ -41,42 +41,59 @@ export const Toolbar = () => {
         </span>
       </div>
       <div className="flex gap-2 sm:gap-3 items-center w-full sm:w-auto justify-end">
+        {" "}
         <Button
           variant="primary"
+          size="md"
           onClick={saveCv}
           disabled={isExporting}
-          className="w-full sm:w-auto"
+          fullWidth={true}
+          className="sm:w-auto"
+          iconLeft={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+              />
+            </svg>
+          }
         >
           Save
         </Button>
         <Button
           variant="secondary"
+          size="md"
           onClick={exportPDF}
-          disabled={true}
-          title="Coming Soon"
-          style={{ position: "relative", pointerEvents: "auto" }}
-          className="p-1 w-full sm:w-auto"
+          disabled={isExporting}
+          tooltip={isExporting ? "PDF generation in progress..." : ""}
+          fullWidth={true}
+          className="sm:w-auto opacity-20"
+          iconLeft={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+              />
+            </svg>
+          }
         >
           {isExporting ? "Generating PDF..." : "Download PDF"}
-          <span
-            style={{
-              visibility: "hidden",
-              background: "#222",
-              color: "#fff",
-              borderRadius: 4,
-              padding: "4px 10px",
-              position: "absolute",
-              left: "50%",
-              bottom: "120%",
-              transform: "translateX(-50%)",
-              fontSize: 12,
-              whiteSpace: "nowrap",
-              zIndex: 100,
-            }}
-            className="download-tooltip"
-          >
-            Comingsoon
-          </span>
         </Button>
       </div>
     </div>
